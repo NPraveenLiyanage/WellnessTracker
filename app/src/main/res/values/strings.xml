@@ -46,10 +46,39 @@
     <!-- Widget -->
     <string name="widget_progress_format">Today: %1$d%%</string>
     <string name="widget_progress_placeholder">Today: 0%%</string>
+    <string name="widget_steps_placeholder">Steps today: 0</string>
 
     <!-- Formatting helpers -->
     <string name="progress_percent">%1$d%%</string>
 
     <!-- Other helpers -->
     <string name="zero_percent">0%</string>
+
+    <!-- Delete confirmation -->
+    <string name="confirm_delete_habit">Delete this habit?</string>
+    <string name="delete">Delete</string>
+
+    <!-- Steps display (transient) -->
+    <string name="steps_today">Steps today: %1$d</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_title_habits">Build healthy habits</string>
+    <string name="onboarding_desc_habits">Create, track, and complete daily habits with a simple checklist.</string>
+    <string name="onboarding_title_mood">Track your mood</string>
+    <string name="onboarding_desc_mood">Log how you feel and see weekly trends to understand your wellness.</string>
+    <string name="onboarding_title_hydration">Stay hydrated</string>
+    <string name="onboarding_desc_hydration">Enable gentle reminders to drink water throughout the day.</string>
+    <string name="skip">Skip</string>
+    <string name="next">Next</string>
+    <string name="get_started">Get started</string>
+
+    <!-- Safe-mode strings -->
+    <string name="safe_mode_title">WellnessTracker (Safe Mode)</string>
+    <string name="safe_mode_start">Start App</string>
+    <string name="safe_mode_show_crash">Show Last Crash</string>
+    <string name="safe_mode_last_crash">Last crash report</string>
+    <string name="no_crash_file">No crash file found.</string>
+
+    <!-- Accessibility helpers -->
+    <string name="app_logo">App logo</string>
 </resources>

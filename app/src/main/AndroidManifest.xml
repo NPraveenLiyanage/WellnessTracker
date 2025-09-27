@@ -5,8 +5,10 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
 
     <application
+        android:name=".App"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -16,15 +18,26 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.WellnessTracker"
         tools:targetApi="31">
+
+        <!-- Launch activity: lightweight splash themed activity that forwards to onboarding or main -->
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
+            android:name=".SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.WellnessTracker.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.WellnessTracker" />
+
+        <activity
+            android:name=".OnboardingActivity"
+            android:exported="false" />
 
         <receiver
             android:name=".BootReceiver"
@@ -47,6 +60,16 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <!-- Update widget after app updates to pick up new layout/views -->
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+            <!-- Refresh on date/time changes so daily data stays current -->
+            <intent-filter>
+                <action android:name="android.intent.action.DATE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"

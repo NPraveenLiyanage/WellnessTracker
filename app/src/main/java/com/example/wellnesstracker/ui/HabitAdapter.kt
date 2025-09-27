@@ -14,6 +14,7 @@ import com.example.wellnesstracker.model.Habit
 
 class HabitAdapter(
     private val onChecked: (habit: Habit, checked: Boolean) -> Unit,
+    private val onClick: (habit: Habit) -> Unit,
     private val onLongPressed: (habit: Habit) -> Unit
 ) : ListAdapter<Habit, HabitAdapter.HabitVH>(DIFF) {
 
@@ -38,7 +39,7 @@ class HabitAdapter(
 
     override fun onBindViewHolder(holder: HabitVH, position: Int) {
         val item = getItem(position)
-        holder.bind(item, onChecked, onLongPressed)
+        holder.bind(item, onChecked, onClick, onLongPressed)
         if (animateId != null && item.id == animateId) {
             holder.itemView.clearAnimation()
             val anim = AlphaAnimation(0f, 1f)
@@ -52,11 +53,20 @@ class HabitAdapter(
         private val name: TextView = itemView.findViewById(R.id.textName)
         private val check: CheckBox = itemView.findViewById(R.id.checkCompleted)
 
-        fun bind(item: Habit, onChecked: (Habit, Boolean) -> Unit, onLongPressed: (Habit) -> Unit) {
+        fun bind(
+            item: Habit,
+            onChecked: (Habit, Boolean) -> Unit,
+            onClick: (Habit) -> Unit,
+            onLongPressed: (Habit) -> Unit
+        ) {
             name.text = item.name
             check.setOnCheckedChangeListener(null)
             check.isChecked = item.completed
             check.setOnCheckedChangeListener { _, isChecked -> onChecked(item, isChecked) }
+
+            itemView.setOnClickListener {
+                onClick(item)
+            }
 
             itemView.setOnLongClickListener {
                 onLongPressed(item)
@@ -65,4 +75,3 @@ class HabitAdapter(
         }
     }
 }
-

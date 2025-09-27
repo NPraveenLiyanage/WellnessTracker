@@ -29,6 +29,18 @@
         android:layout_marginEnd="@dimen/spacing"
         android:layout_marginTop="8dp"/>
 
+    <!-- Steps counter (transient UI while fragment visible) -->
+    <TextView
+        android:id="@+id/textSteps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/steps_today"
+        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/progressBar"
+        android:layout_marginStart="@dimen/spacing"
+        android:layout_marginTop="8dp" />
+
     <!-- Empty state message shown when there are no habits -->
     <TextView
         android:id="@+id/textEmpty"
@@ -38,7 +50,7 @@
         android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
         android:gravity="center"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/progressBar"
+        app:layout_constraintTop_toBottomOf="@id/textSteps"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp"

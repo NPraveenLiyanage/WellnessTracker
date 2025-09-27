@@ -12,6 +12,17 @@ import com.example.wellnesstracker.util.SharedPrefsHelper
 import java.time.LocalDate
 
 class WellnessWidget : AppWidgetProvider() {
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+        when (intent.action) {
+            Intent.ACTION_MY_PACKAGE_REPLACED,
+            Intent.ACTION_DATE_CHANGED,
+            Intent.ACTION_TIME_CHANGED -> {
+                updateAll(context)
+            }
+        }
+    }
+
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         super.onUpdate(context, appWidgetManager, appWidgetIds)
         val today = LocalDate.now().toString()
@@ -19,12 +30,14 @@ class WellnessWidget : AppWidgetProvider() {
         val total = habits.size
         val done = habits.count { it.completed }
         val percent = if (total == 0) 0 else ((done * 100f) / total).toInt()
+        val stepsToday = SharedPrefsHelper.getStepsForDate(context, today)
 
         appWidgetIds.forEach { appWidgetId ->
             val views = RemoteViews(context.packageName, R.layout.widget_wellness).apply {
                 setTextViewText(R.id.textTitle, context.getString(R.string.app_name))
                 setTextViewText(R.id.textProgress, context.getString(R.string.widget_progress_format, percent))
                 setProgressBar(R.id.progressBar, 100, percent, false)
+                setTextViewText(R.id.textSteps, context.getString(R.string.steps_today, stepsToday))
 
                 val intent = Intent(context, MainActivity::class.java).apply {
                     action = MainActivity.ACTION_SHOW_HABITS
@@ -53,4 +66,3 @@ class WellnessWidget : AppWidgetProvider() {
         }
     }
 }
-

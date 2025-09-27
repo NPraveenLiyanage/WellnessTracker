@@ -88,4 +88,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    // Android 12+ SplashScreen API backward-compat support
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
 }

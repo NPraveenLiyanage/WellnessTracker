@@ -19,6 +19,12 @@ object SharedPrefsHelper {
     // New: single key storing the entire moods history list
     private const val KEY_MOODS_ALL = "moods_all"
 
+    // Onboarding completion flag
+    private const val KEY_ONBOARDING_DONE = "onboarding_done"
+
+    // New: per-date steps key prefix
+    private const val KEY_STEPS_PREFIX = "steps_" // key is steps_yyyy-MM-dd
+
     private fun prefs(context: Context): SharedPreferences =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
@@ -67,5 +73,37 @@ object SharedPrefsHelper {
     fun saveAllMoods(context: Context, moods: List<Mood>) {
         val json = Gson().toJson(moods)
         prefs(context).edit().putString(KEY_MOODS_ALL, json).apply()
+    }
+
+    // --- Onboarding flag ---
+
+    fun isOnboardingDone(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_ONBOARDING_DONE, false)
+
+    fun setOnboardingDone(context: Context, done: Boolean = true) {
+        prefs(context).edit().putBoolean(KEY_ONBOARDING_DONE, done).apply()
+    }
+
+    // --- Steps persistence (per date) ---
+
+    /** Gets the stored step count for the given ISO date (yyyy-MM-dd). Returns 0 if missing. */
+    fun getStepsForDate(context: Context, date: String): Int {
+        return prefs(context).getInt(KEY_STEPS_PREFIX + date, 0)
+    }
+
+    /** Sets the step count for the given date. */
+    fun setStepsForDate(context: Context, date: String, steps: Int) {
+        prefs(context).edit().putInt(KEY_STEPS_PREFIX + date, steps.coerceAtLeast(0)).apply()
+    }
+
+    /** Adds delta steps (can be positive) to the given date and returns the new total. */
+    fun addStepsForDate(context: Context, date: String, delta: Int): Int {
+        if (delta == 0) return getStepsForDate(context, date)
+        val p = prefs(context)
+        val key = KEY_STEPS_PREFIX + date
+        val current = p.getInt(key, 0)
+        val next = (current + delta).coerceAtLeast(0)
+        p.edit().putInt(key, next).apply()
+        return next
     }
 }

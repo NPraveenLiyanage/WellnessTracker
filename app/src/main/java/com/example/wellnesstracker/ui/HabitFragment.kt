@@ -46,6 +46,9 @@ class HabitFragment : Fragment() {
     private var accelCurrent = SensorManager.GRAVITY_EARTH
     private var lastShakeTime = 0L
 
+    // Step counter state (TYPE_STEP_DETECTOR fallback). Transient while the fragment is active.
+    private var stepCount: Int = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Smooth fade transitions between tabs
@@ -71,8 +74,13 @@ class HabitFragment : Fragment() {
                 viewModel.setCompleted(habit.id, checked)
                 persistAndRefreshWidget()
             },
-            onLongPressed = { habit ->
+            onClick = { habit ->
+                // Single tap: edit
                 showEditHabitDialog(habit.id, habit.name)
+            },
+            onLongPressed = { habit ->
+                // Long press: confirm deletion
+                showDeleteHabitDialog(habit.id, habit.name)
             }
         )
         val layoutManager = LinearLayoutManager(requireContext())
@@ -117,6 +125,11 @@ class HabitFragment : Fragment() {
             binding.textProgress.text = getString(R.string.progress_percent, pct)
         }
 
+        // Initialize step UI from stored value for today
+        val todayDate = LocalDate.now().toString()
+        stepCount = SharedPrefsHelper.getStepsForDate(requireContext(), todayDate)
+        binding.textSteps?.text = getString(R.string.steps_today, stepCount)
+
         // Load data for today's date
         val today = LocalDate.now().toString()
         viewModel.load(requireContext(), today)
@@ -135,7 +148,8 @@ class HabitFragment : Fragment() {
             .setPositiveButton(R.string.save) { _, _ ->
                 val name = input.text?.toString()?.trim().orEmpty()
                 if (name.isNotEmpty()) {
-                    val id = viewModel.addHabit(requireContext(), name)
+                    val nameNotNull = name
+                    val id = viewModel.addHabit(requireContext(), nameNotNull)
                     adapter.animateNextAdded(id)
                     persistAndRefreshWidget()
                 } else {
@@ -164,6 +178,19 @@ class HabitFragment : Fragment() {
                 } else {
                     input.error = getString(R.string.habit_name_required)
                 }
+            }
+            .show()
+    }
+
+    /** Shows dialog to confirm deletion of a habit. */
+    private fun showDeleteHabitDialog(id: Int, name: String) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(name)
+            .setMessage(getString(R.string.confirm_delete_habit))
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.delete) { _, _ ->
+                viewModel.deleteHabit(id)
+                persistAndRefreshWidget()
             }
             .show()
     }
@@ -208,10 +235,29 @@ class HabitFragment : Fragment() {
         accelCurrent = SensorManager.GRAVITY_EARTH
         lastAccel = SensorManager.GRAVITY_EARTH
         sensorManager?.registerListener(shakeListener, accelerometer, SensorManager.SENSOR_DELAY_UI)
+
+        // Try to register a step detector to count steps in this fragment while visible.
+        val stepSensor = try {
+            sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
+        } catch (e: SecurityException) {
+            null
+        }
+        if (stepSensor != null) {
+            // Load current stored steps for today instead of resetting
+            val today = LocalDate.now().toString()
+            stepCount = SharedPrefsHelper.getStepsForDate(ctx, today)
+            binding.textSteps?.text = getString(R.string.steps_today, stepCount)
+            try {
+                sensorManager?.registerListener(stepListener, stepSensor, SensorManager.SENSOR_DELAY_NORMAL)
+            } catch (_: SecurityException) {
+                // Ignore if permission isn't granted on newer Android; step sensor then won't be available.
+            }
+        }
     }
 
     private fun unregisterShake() {
         sensorManager?.unregisterListener(shakeListener)
+        sensorManager?.unregisterListener(stepListener)
     }
 
     private val shakeListener = object : SensorEventListener {
@@ -233,6 +279,27 @@ class HabitFragment : Fragment() {
         override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
     }
 
+    // Step detector listener: increments a transient step counter and updates UI
+    private val stepListener = object : SensorEventListener {
+        override fun onSensorChanged(event: SensorEvent) {
+            // TYPE_STEP_DETECTOR typically reports 1.0 for each step (or a small count)
+            val delta = event.values?.sumOf { it.toDouble() }?.toInt() ?: 0
+            if (delta > 0) {
+                val ctx = context ?: return
+                val today = LocalDate.now().toString()
+                // Persist and get new total
+                stepCount = SharedPrefsHelper.addStepsForDate(ctx, today, delta)
+                activity?.runOnUiThread {
+                    binding.textSteps?.text = getString(R.string.steps_today, stepCount)
+                }
+                // Refresh widget to reflect updated steps
+                WellnessWidget.updateAll(ctx)
+            }
+        }
+
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+    }
+
     private fun addAutoMood() {
         val ctx = context ?: return
         val list = SharedPrefsHelper.loadAllMoods(ctx)
@@ -240,7 +307,7 @@ class HabitFragment : Fragment() {
         val newMood = Mood(
             date = now.toLocalDate().toString(),
             time = now.format(DateTimeFormatter.ofPattern("HH:mm")),
-            emoji = "🙂",
+            emoji = "\uD83D\uDE42",
             note = getString(R.string.added_by_shake)
         )
         list.add(0, newMood)
