@@ -1,0 +1,55 @@
+<resources>
+    <string name="app_name">WellnessTracker</string>
+
+    <!-- Bottom nav titles -->
+    <string name="menu_habits">Habits</string>
+    <string name="menu_mood">Mood</string>
+    <string name="menu_settings">Settings</string>
+
+    <!-- Fragment titles -->
+    <string name="title_habits">Habits</string>
+    <string name="title_mood">Mood</string>
+    <string name="title_settings">Settings</string>
+
+    <!-- Habits -->
+    <string name="add">Add</string>
+    <string name="add_habit">Add habit</string>
+    <string name="edit_habit">Edit habit</string>
+    <string name="habit_name">Habit name</string>
+    <string name="habit_name_required">Please enter a name</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="empty_habits">No habits yet. Tap + to add one.</string>
+
+    <!-- Mood -->
+    <string name="add_mood">Add mood</string>
+    <string name="pick_mood">Pick how you feel</string>
+    <string name="note_optional">Note (optional)</string>
+    <string name="share">Share</string>
+    <string name="no_mood_data">No mood data for the last 7 days</string>
+    <string name="share_mood">Share mood via</string>
+    <string name="added_by_shake">Auto-added by shake</string>
+
+    <!-- Hydration notifications -->
+    <string name="hydration_title">Drink Water!</string>
+    <string name="hydration_content">Stay hydrated!</string>
+    <string name="hydration_channel_name">Hydration reminders</string>
+    <string name="hydration_channel_desc">Notifications to remind you to drink water</string>
+    <string name="pref_summary_hydration_interval">Remind every %1$s minutes</string>
+
+    <!-- Preference strings (added) -->
+    <string name="pref_hydration_enabled_title">Hydration reminders</string>
+    <string name="pref_hydration_enabled_summary">Receive periodic reminders to drink water</string>
+    <string name="pref_hydration_interval_title">Hydration interval (minutes)</string>
+    <string name="pref_hydration_interval_dialog">Set reminder interval in minutes</string>
+
+    <!-- Widget -->
+    <string name="widget_progress_format">Today: %1$d%%</string>
+    <string name="widget_progress_placeholder">Today: 0%%</string>
+
+    <!-- Formatting helpers -->
+    <string name="progress_percent">%1$d%%</string>
+
+    <!-- Other helpers -->
+    <string name="zero_percent">0%</string>
+</resources>

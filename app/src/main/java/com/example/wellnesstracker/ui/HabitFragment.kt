@@ -1,0 +1,253 @@
+package com.example.wellnesstracker.ui
+
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.os.Bundle
+import android.os.Parcelable
+import android.text.InputType
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.EditText
+import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.wellnesstracker.R
+import com.example.wellnesstracker.WellnessWidget
+import com.example.wellnesstracker.databinding.FragmentHabitBinding
+import com.example.wellnesstracker.model.Mood
+import com.example.wellnesstracker.util.SharedPrefsHelper
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.transition.MaterialFadeThrough
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
+class HabitFragment : Fragment() {
+    private var _binding: FragmentHabitBinding? = null
+    private val binding get() = _binding!!
+
+    private val viewModel: HabitViewModel by viewModels()
+    private lateinit var adapter: HabitAdapter
+
+    // Save transient scroll state across rotation
+    private var recyclerState: Parcelable? = null
+
+    // Optional: accelerometer-based shake detection to auto-add a mood
+    private var sensorManager: SensorManager? = null
+    private var lastAccel = 0f
+    private var accel = 0f
+    private var accelCurrent = SensorManager.GRAVITY_EARTH
+    private var lastShakeTime = 0L
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Smooth fade transitions between tabs
+        enterTransition = MaterialFadeThrough()
+        exitTransition = MaterialFadeThrough()
+        recyclerState = savedInstanceState?.getParcelable(KEY_RECYCLER_STATE)
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentHabitBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    /** Loads habits for today and updates RecyclerView. */
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // RecyclerView setup
+        adapter = HabitAdapter(
+            onChecked = { habit, checked ->
+                viewModel.setCompleted(habit.id, checked)
+                persistAndRefreshWidget()
+            },
+            onLongPressed = { habit ->
+                showEditHabitDialog(habit.id, habit.name)
+            }
+        )
+        val layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerHabits.layoutManager = layoutManager
+        binding.recyclerHabits.adapter = adapter
+
+        // Restore recycler scroll position after rotation
+        recyclerState?.let { state ->
+            binding.recyclerHabits.post { layoutManager.onRestoreInstanceState(state) }
+        }
+
+        // Swipe-to-delete
+        val touchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean = false
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val pos = viewHolder.bindingAdapterPosition
+                val item = adapter.currentList.getOrNull(pos)
+                if (item != null) {
+                    viewModel.deleteHabit(item.id)
+                    persistAndRefreshWidget()
+                }
+            }
+        })
+        touchHelper.attachToRecyclerView(binding.recyclerHabits)
+
+        // FAB add habit
+        binding.fabAdd.setOnClickListener { showAddHabitDialog() }
+
+        // Observe data
+        viewModel.habits.observe(viewLifecycleOwner) { list ->
+            adapter.submitList(list)
+            // Empty state handling
+            binding.textEmpty?.isVisible = list.isEmpty()
+        }
+        viewModel.progress.observe(viewLifecycleOwner) { pct ->
+            binding.progressBar.progress = pct
+            binding.textProgress.text = getString(R.string.progress_percent, pct)
+        }
+
+        // Load data for today's date
+        val today = LocalDate.now().toString()
+        viewModel.load(requireContext(), today)
+    }
+
+    /** Shows dialog to add a new habit. */
+    private fun showAddHabitDialog() {
+        val input = EditText(requireContext()).apply {
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+            hint = getString(R.string.habit_name)
+        }
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.add_habit)
+            .setView(input)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.save) { _, _ ->
+                val name = input.text?.toString()?.trim().orEmpty()
+                if (name.isNotEmpty()) {
+                    val id = viewModel.addHabit(requireContext(), name)
+                    adapter.animateNextAdded(id)
+                    persistAndRefreshWidget()
+                } else {
+                    input.error = getString(R.string.habit_name_required)
+                }
+            }
+            .show()
+    }
+
+    /** Shows dialog to edit an existing habit. */
+    private fun showEditHabitDialog(id: Int, currentName: String) {
+        val input = EditText(requireContext()).apply {
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+            setText(currentName)
+            setSelection(currentName.length)
+        }
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.edit_habit)
+            .setView(input)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.save) { _, _ ->
+                val newName = input.text?.toString()?.trim().orEmpty()
+                if (newName.isNotEmpty()) {
+                    viewModel.editHabit(id, newName)
+                    persistAndRefreshWidget()
+                } else {
+                    input.error = getString(R.string.habit_name_required)
+                }
+            }
+            .show()
+    }
+
+    /** Persists changes when leaving the screen. */
+    override fun onPause() {
+        super.onPause()
+        viewModel.save(requireContext())
+        unregisterShake()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        registerShake()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        // Save recycler scroll position to survive rotation
+        outState.putParcelable(KEY_RECYCLER_STATE, binding.recyclerHabits.layoutManager?.onSaveInstanceState())
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private fun persistAndRefreshWidget() {
+        // Save immediately so the widget can reflect the latest state
+        viewModel.save(requireContext())
+        // Update widget to show today's progress
+        WellnessWidget.updateAll(requireContext())
+    }
+
+    // --- Optional: Shake detection to auto-add a neutral mood entry ---
+
+    private fun registerShake() {
+        val ctx = context ?: return
+        sensorManager = ctx.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val accelerometer = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) ?: return
+        accel = 0.0f
+        accelCurrent = SensorManager.GRAVITY_EARTH
+        lastAccel = SensorManager.GRAVITY_EARTH
+        sensorManager?.registerListener(shakeListener, accelerometer, SensorManager.SENSOR_DELAY_UI)
+    }
+
+    private fun unregisterShake() {
+        sensorManager?.unregisterListener(shakeListener)
+    }
+
+    private val shakeListener = object : SensorEventListener {
+        override fun onSensorChanged(event: SensorEvent) {
+            val x = event.values[0]
+            val y = event.values[1]
+            val z = event.values[2]
+            lastAccel = accelCurrent
+            accelCurrent = kotlin.math.sqrt((x * x + y * y + z * z).toDouble()).toFloat()
+            val delta = accelCurrent - lastAccel
+            accel = accel * 0.9f + delta // low-cut filter
+
+            val now = System.currentTimeMillis()
+            if (accel > 8f && now - lastShakeTime > 2000) { // threshold and 2s debounce
+                lastShakeTime = now
+                addAutoMood()
+            }
+        }
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+    }
+
+    private fun addAutoMood() {
+        val ctx = context ?: return
+        val list = SharedPrefsHelper.loadAllMoods(ctx)
+        val now = LocalDateTime.now()
+        val newMood = Mood(
+            date = now.toLocalDate().toString(),
+            time = now.format(DateTimeFormatter.ofPattern("HH:mm")),
+            emoji = "🙂",
+            note = getString(R.string.added_by_shake)
+        )
+        list.add(0, newMood)
+        SharedPrefsHelper.saveAllMoods(ctx, list)
+    }
+
+    companion object {
+        private const val KEY_RECYCLER_STATE = "habit_recycler_state"
+    }
+}

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreferenceCompat
+        android:key="notifications_enabled"
+        android:title="Enable notifications"
+        android:defaultValue="true" />
+
+    <SwitchPreferenceCompat
+        android:key="use_exact_alarm"
+        android:title="Use exact alarms"
+        android:defaultValue="false" />
+</PreferenceScreen>

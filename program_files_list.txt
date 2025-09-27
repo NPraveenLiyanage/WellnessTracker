@@ -1,0 +1,39 @@
+﻿Android
+AntiCheatExpert
+Apache NetBeans
+Application Verifier
+ASUS
+Common Files
+Docker
+Eclipse Adoptium
+Git
+Google
+Internet Explorer
+JetBrains
+Langflow
+McAfee
+Microsoft
+Microsoft GameInput
+Microsoft Office
+Microsoft Office 15
+Microsoft OneDrive
+Microsoft SQL Server
+Microsoft Update Health Tools
+Microsoft Visual Studio
+ModifiableWindowsApps
+MSBuild
+nodejs
+Notepad++
+R
+Rainmeter
+Reference Assemblies
+RStudio
+VideoLAN
+Weka-3-8-6
+Windows Defender
+Windows Mail
+Windows Media Player
+Windows NT
+Windows Photo Viewer
+WindowsPowerShell
+WSL
