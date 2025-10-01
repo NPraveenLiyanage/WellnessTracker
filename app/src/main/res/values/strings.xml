@@ -24,6 +24,8 @@
     <!-- Mood -->
     <string name="add_mood">Add mood</string>
     <string name="pick_mood">Pick how you feel</string>
+    <string name="select_your_mood">Select your mood</string>
+    <string name="mood_intensity_label">How intense is this feeling? (1-10)</string>
     <string name="note_optional">Note (optional)</string>
     <string name="share">Share</string>
     <string name="no_mood_data">No mood data for the last 7 days</string>
@@ -81,4 +83,50 @@
 
     <!-- Accessibility helpers -->
     <string name="app_logo">App logo</string>
+
+    <!-- Settings fragment strings (added) -->
+    <string name="settings_subtitle">Customize your wellness tracking experience</string>
+    <string name="title_profile">Profile</string>
+    <string name="your_name">Your Name</string>
+    <string name="edit_profile_information">Edit profile information</string>
+    <string name="chevron">›</string>
+
+    <string name="title_notifications">Notifications</string>
+    <string name="daily_reminders">Daily Reminders</string>
+    <string name="daily_reminders_summary">Get reminded to track your mood and habits</string>
+    <string name="habit_reminders">Habit Reminders</string>
+    <string name="habit_reminders_summary">Get notified about habit completion</string>
+    <string name="weekly_reports">Weekly Reports</string>
+    <string name="weekly_reports_summary">Receive weekly progress summaries</string>
+
+    <string name="title_appearance">Appearance</string>
+    <string name="label_theme">Theme</string>
+    <string name="label_light_theme">Light theme</string>
+    <string name="label_color_scheme">Color Scheme</string>
+    <string name="value_color_scheme">Wellness (Teal &amp; Coral)</string>
+
+    <string name="title_data_privacy">Data &amp; Privacy</string>
+    <string name="export_data">Export Data</string>
+    <string name="export_data_summary">Download your wellness data</string>
+    <string name="delete_all_data">Delete All Data</string>
+    <string name="delete_all_data_summary">Permanently remove all your data</string>
+
+    <string name="title_about">About</string>
+    <string name="label_version">Version</string>
+    <string name="app_version">1.0.0</string>
+    <string name="terms_privacy">Terms of Service &amp; Privacy Policy</string>
+
+    <!-- Emoji resources -->
+    <string name="emoji_profile">👤</string>
+
+    <!-- Mood emoji strings -->
+    <string name="emoji_happy">😊</string>
+    <string name="emoji_smile">🙂</string>
+    <string name="emoji_neutral">😐</string>
+    <string name="emoji_sad">😢</string>
+    <string name="emoji_angry">😡</string>
+    <string name="emoji_mad">😠</string>
+    <string name="emoji_sleepy">😴</string>
+    <string name="emoji_anxious">😰</string>
+
 </resources>

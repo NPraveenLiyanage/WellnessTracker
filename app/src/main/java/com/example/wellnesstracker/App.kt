@@ -12,6 +12,13 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // Log and record startup
+        try {
+            Log.i(TAG, "Application onCreate start")
+            File(filesDir, "startup_trace.txt").appendText("App.onCreate\n")
+        } catch (_: Throwable) {
+        }
+
         defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { t, e ->
             try {

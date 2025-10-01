@@ -1,33 +1,174 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="56dp"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp">
+    android:layout_margin="@dimen/margin_sm"
+    app:cardCornerRadius="@dimen/card_corner_radius"
+    app:cardElevation="@dimen/card_elevation"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
 
-    <CheckBox
-        android:id="@+id/checkCompleted"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        android:orientation="vertical"
+        android:padding="@dimen/padding_md">
 
-    <TextView
-        android:id="@+id/textName"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-        android:ellipsize="end"
-        android:maxLines="2"
-        app:layout_constraintStart_toEndOf="@id/checkCompleted"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="12dp"/>
+        <!-- Header Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <!-- Checkbox -->
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/cb_habit_completed"
+                android:layout_width="@dimen/habit_checkbox_size"
+                android:layout_height="@dimen/habit_checkbox_size"
+                app:buttonTint="@color/primary_500" />
+
+            <!-- Habit Icon -->
+            <TextView
+                android:id="@+id/tv_habit_icon"
+                android:layout_width="@dimen/icon_size_large"
+                android:layout_height="@dimen/icon_size_large"
+                android:layout_marginStart="@dimen/margin_sm"
+                android:text="💧"
+                android:textSize="@dimen/icon_size_medium"
+                android:gravity="center" />
+
+            <!-- Habit Details -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="@dimen/margin_md"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_habit_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Drink Water"
+                    android:textAppearance="@style/TextAppearance.WellnessTracker.Body"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_habit_description"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Stay hydrated throughout the day"
+                    android:textAppearance="@style/TextAppearance.WellnessTracker.Caption"
+                    android:layout_marginTop="@dimen/margin_xs" />
+
+            </LinearLayout>
+
+            <!-- Streak Badge -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@drawable/card_gradient_secondary"
+                android:padding="@dimen/padding_sm"
+                android:layout_marginStart="@dimen/margin_sm">
+
+                <TextView
+                    android:id="@+id/tv_habit_streak"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="7"
+                    android:textAppearance="@style/TextAppearance.WellnessTracker.Body"
+                    android:textColor="@color/secondary_700"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="days"
+                    android:textAppearance="@style/TextAppearance.WellnessTracker.Caption"
+                    android:textColor="@color/secondary_600" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Progress Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_md"
+            android:orientation="vertical">
+
+            <!-- Progress Info -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tv_habit_progress_label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Progress"
+                    android:textAppearance="@style/TextAppearance.WellnessTracker.Caption" />
+
+                <TextView
+                    android:id="@+id/tv_habit_progress_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="6/8 glasses"
+                    android:textAppearance="@style/TextAppearance.WellnessTracker.Caption"
+                    android:textColor="@color/primary_500"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <!-- Progress Bar -->
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/progress_habit"
+                style="@style/Widget.WellnessTracker.ProgressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_sm"
+                android:progress="75"
+                android:max="100" />
+
+        </LinearLayout>
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_md"
+            android:orientation="horizontal"
+            android:gravity="end">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_habit_minus"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="@dimen/button_height"
+                android:layout_height="@dimen/button_height"
+                app:icon="@drawable/ic_remove_24"
+                app:iconTint="@color/secondary_500"
+                android:layout_marginEnd="@dimen/margin_sm" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_habit_plus"
+                style="@style/Widget.Material3.Button.IconButton.Filled"
+                android:layout_width="@dimen/button_height"
+                android:layout_height="@dimen/button_height"
+                app:icon="@drawable/ic_add_24"
+                app:iconTint="@android:color/white"
+                android:backgroundTint="@color/primary_500" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

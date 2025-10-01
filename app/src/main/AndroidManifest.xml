@@ -7,6 +7,21 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
 
+    <!-- Declare packages the app needs to query (Android 11+ package visibility) -->
+    <queries>
+        <package android:name="com.facebook.katana" />
+        <package android:name="com.facebook.orca" />
+        <package android:name="com.facebook.lite" />
+        <package android:name="com.zhiliaoapp.musically" />
+        <package android:name="com.zhiliaoapp.musically.go" />
+        <package android:name="com.whatsapp.w4b" />
+        <package android:name="com.instagram.android" />
+        <package android:name="com.snapchat.android" />
+        <package android:name="us.zoom.videomeetings" />
+        <package android:name="com.pinterest" />
+        <!-- Add more packages here if you need to reliably detect them -->
+    </queries>
+
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -38,6 +53,7 @@
         <activity
             android:name=".OnboardingActivity"
             android:exported="false" />
+
 
         <receiver
             android:name=".BootReceiver"

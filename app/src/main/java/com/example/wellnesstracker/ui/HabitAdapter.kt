@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
-import android.widget.CheckBox
+import com.google.android.material.checkbox.MaterialCheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -50,8 +50,8 @@ class HabitAdapter(
     }
 
     class HabitVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val name: TextView = itemView.findViewById(R.id.textName)
-        private val check: CheckBox = itemView.findViewById(R.id.checkCompleted)
+        private val name: TextView = itemView.findViewById(R.id.tv_habit_name)
+        private val check: MaterialCheckBox = itemView.findViewById(R.id.cb_habit_completed)
 
         fun bind(
             item: Habit,

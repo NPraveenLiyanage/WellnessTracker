@@ -1,15 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/habitFragment"
-        android:title="@string/menu_habits"
-        android:icon="@drawable/ic_habits_24" />
+
     <item
         android:id="@+id/moodFragment"
-        android:title="@string/menu_mood"
-        android:icon="@drawable/ic_mood_24" />
+        android:title="Mood"
+        android:icon="@drawable/ic_mood_24"
+        android:enabled="true" />
+
+    <item
+        android:id="@+id/habitFragment"
+        android:title="Habits"
+        android:icon="@drawable/ic_habits_24"
+        android:enabled="true" />
+
     <item
         android:id="@+id/settingsFragment"
-        android:title="@string/menu_settings"
-        android:icon="@drawable/ic_settings_24" />
+        android:title="Settings"
+        android:icon="@drawable/ic_settings_24"
+        android:enabled="true" />
+
 </menu>

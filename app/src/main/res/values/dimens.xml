@@ -1,7 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Spacing -->
+    <dimen name="spacing_xs">4dp</dimen>
+    <dimen name="spacing_sm">8dp</dimen>
+    <dimen name="spacing_md">16dp</dimen>
+    <dimen name="spacing_lg">24dp</dimen>
+    <dimen name="spacing_xl">32dp</dimen>
+    <dimen name="spacing_xxl">48dp</dimen>
+    <!-- Ensure generic spacing for landscape layouts -->
     <dimen name="spacing">16dp</dimen>
-    <dimen name="fab_margin">16dp</dimen>
-    <dimen name="chart_height">220dp</dimen>
-</resources>
 
+    <!-- Padding -->
+    <dimen name="padding_xs">4dp</dimen>
+    <dimen name="padding_sm">8dp</dimen>
+    <dimen name="padding_md">16dp</dimen>
+    <dimen name="padding_lg">24dp</dimen>
+    <dimen name="padding_xl">32dp</dimen>
+
+    <!-- Margins -->
+    <dimen name="margin_xs">4dp</dimen>
+    <dimen name="margin_sm">8dp</dimen>
+    <dimen name="margin_md">16dp</dimen>
+    <dimen name="margin_lg">24dp</dimen>
+    <dimen name="margin_xl">32dp</dimen>
+
+    <!-- Card dimensions -->
+    <dimen name="card_elevation">4dp</dimen>
+    <dimen name="card_corner_radius">12dp</dimen>
+    <dimen name="card_large_corner_radius">16dp</dimen>
+
+    <!-- Button dimensions -->
+    <dimen name="button_height">48dp</dimen>
+    <dimen name="button_height_large">56dp</dimen>
+    <dimen name="button_corner_radius">24dp</dimen>
+    <dimen name="fab_size">56dp</dimen>
+    <!-- Ensure FAB margin used in landscape layouts -->
+    <dimen name="fab_margin">16dp</dimen>
+
+    <!-- Icon sizes -->
+    <dimen name="icon_size_small">16dp</dimen>
+    <dimen name="icon_size_medium">24dp</dimen>
+    <dimen name="icon_size_large">32dp</dimen>
+    <dimen name="icon_size_xl">48dp</dimen>
+
+    <!-- Text sizes -->
+    <dimen name="text_size_caption">12sp</dimen>
+    <dimen name="text_size_body">14sp</dimen>
+    <dimen name="text_size_subhead">16sp</dimen>
+    <dimen name="text_size_title">18sp</dimen>
+    <dimen name="text_size_headline">24sp</dimen>
+    <dimen name="text_size_display">32sp</dimen>
+
+    <!-- Bottom navigation -->
+    <dimen name="bottom_nav_height">80dp</dimen>
+    <dimen name="bottom_nav_icon_size">24dp</dimen>
+
+    <!-- List item heights -->
+    <dimen name="list_item_height">72dp</dimen>
+    <dimen name="list_item_height_small">56dp</dimen>
+    <dimen name="list_item_height_large">88dp</dimen>
+
+    <!-- Widget dimensions -->
+    <dimen name="widget_corner_radius">16dp</dimen>
+    <dimen name="widget_padding">16dp</dimen>
+    <dimen name="widget_elevation">8dp</dimen>
+
+    <!-- Mood tracker specific: reduced sizes so emoji tiles fit on smaller screens and don't get clipped -->
+    <dimen name="mood_item_size">56dp</dimen>
+    <dimen name="mood_emoji_size">24sp</dimen>
+    <!-- Radius used by mood_item_background to render a perfect circle (half of mood_item_size) -->
+    <dimen name="mood_item_radius">28dp</dimen>
+
+    <!-- Habit tracker specific -->
+    <dimen name="habit_progress_height">8dp</dimen>
+    <dimen name="habit_checkbox_size">24dp</dimen>
+</resources>

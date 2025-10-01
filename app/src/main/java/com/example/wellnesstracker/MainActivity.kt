@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -21,6 +22,7 @@ import androidx.preference.PreferenceManager
 import com.example.wellnesstracker.databinding.ActivityMainBinding
 import com.example.wellnesstracker.WellnessWidget
 import com.example.wellnesstracker.util.HydrationScheduler
+import com.example.wellnesstracker.util.PackageUtils
 import com.example.wellnesstracker.util.SharedPrefsHelper
 import java.io.File
 import java.io.PrintWriter
@@ -43,6 +45,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         try {
+            File(filesDir, "startup_trace.txt").appendText("Main.onCreate\n")
+            Log.i(TAG, "onCreate start")
+
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
             enableEdgeToEdge()
 
@@ -54,6 +59,7 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             if (!onboardingDone) {
+                Log.i(TAG, "Onboarding not done -> launching OnboardingActivity and finishing Main")
                 startActivity(Intent(this, OnboardingActivity::class.java))
                 finish()
                 return
@@ -62,6 +68,7 @@ class MainActivity : AppCompatActivity() {
             // Inflate and set content view
             binding = ActivityMainBinding.inflate(layoutInflater)
             setContentView(binding.root)
+            Log.i(TAG, "setContentView complete")
 
             // Subtle content animation
             binding.root.apply {
@@ -76,6 +83,7 @@ class MainActivity : AppCompatActivity() {
                 ?: throw IllegalStateException("NavHostFragment not found in activity_main layout")
             navController = hostFragment.navController
             binding.bottomNav.setupWithNavController(navController)
+            Log.i(TAG, "NavController setup complete")
 
             // Apply window inset padding
             ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -100,8 +108,18 @@ class MainActivity : AppCompatActivity() {
                 Log.w(TAG, "Failed to update widget", t)
             }
 
+            // Check common third-party packages in a safe, well-handled way to avoid spamming logs
+            try {
+                PackageUtils.logInstalledPackages(this)
+            } catch (t: Throwable) {
+                Log.w(TAG, "Failed to perform package visibility checks", t)
+            }
+
             // Handle any navigation intent
             handleIntent(intent)
+
+            Log.i(TAG, "MainActivity ready")
+            File(filesDir, "startup_trace.txt").appendText("Main.ready\n")
 
         } catch (t: Throwable) {
             Log.e(TAG, "Unhandled throwable in onCreate", t)
@@ -117,8 +135,8 @@ class MainActivity : AppCompatActivity() {
             } catch (io: Throwable) {
                 Log.e(TAG, "Failed to write crash file", io)
             }
-            // rethrow to let system handle it (will show crash dialog) OR finish gracefully
-            // finish() // choose to finish to avoid loop
+            // Safe Mode removed: do not attempt to start a separate SafeModeActivity; instead finish.
+            finish()
         }
     }
 

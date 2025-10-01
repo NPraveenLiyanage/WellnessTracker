@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -28,6 +29,7 @@ import com.google.android.material.transition.MaterialFadeThrough
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import android.util.Log
 
 class HabitFragment : Fragment() {
     private var _binding: FragmentHabitBinding? = null
@@ -84,12 +86,12 @@ class HabitFragment : Fragment() {
             }
         )
         val layoutManager = LinearLayoutManager(requireContext())
-        binding.recyclerHabits.layoutManager = layoutManager
-        binding.recyclerHabits.adapter = adapter
+        binding.recyclerHabits?.layoutManager = layoutManager
+        binding.recyclerHabits?.adapter = adapter
 
         // Restore recycler scroll position after rotation
         recyclerState?.let { state ->
-            binding.recyclerHabits.post { layoutManager.onRestoreInstanceState(state) }
+            binding.recyclerHabits?.post { layoutManager.onRestoreInstanceState(state) }
         }
 
         // Swipe-to-delete
@@ -109,26 +111,48 @@ class HabitFragment : Fragment() {
                 }
             }
         })
-        touchHelper.attachToRecyclerView(binding.recyclerHabits)
+        // Attach only if RecyclerView exists in this layout variant
+        binding.recyclerHabits?.let { rv ->
+            touchHelper.attachToRecyclerView(rv)
+        }
 
         // FAB add habit
-        binding.fabAdd.setOnClickListener { showAddHabitDialog() }
+        binding.fabAdd?.setOnClickListener { showAddHabitDialog() }
 
         // Observe data
         viewModel.habits.observe(viewLifecycleOwner) { list ->
             adapter.submitList(list)
-            // Empty state handling
-            binding.textEmpty?.isVisible = list.isEmpty()
+            // Empty state handling — handle layouts that may not include the empty view
+            val emptyId = resources.getIdentifier("textEmpty", "id", requireContext().packageName)
+            if (emptyId != 0) binding.root.findViewById<View>(emptyId).isVisible = list.isEmpty()
         }
         viewModel.progress.observe(viewLifecycleOwner) { pct ->
-            binding.progressBar.progress = pct
-            binding.textProgress.text = getString(R.string.progress_percent, pct)
+            // Try multiple APIs via reflection to set progress across different Material versions
+            binding.progressBar?.let { pb ->
+                try {
+                    val m = pb.javaClass.getMethod("setProgress", Int::class.javaPrimitiveType)
+                    m.invoke(pb, pct)
+                } catch (nsme: NoSuchMethodException) {
+                    try {
+                        val m2 = pb.javaClass.getMethod("setProgressCompat", Int::class.javaPrimitiveType, Boolean::class.javaPrimitiveType)
+                        m2.invoke(pb, pct, false)
+                    } catch (e: Exception) {
+                        // Last resort: try setProgress via kotlin property if exposed, else log and ignore
+                        Log.w("HabitFragment", "Unable to set progress on progressBar view: ${e.message}")
+                    }
+                } catch (e: Exception) {
+                    Log.w("HabitFragment", "Failed to set progress on progressBar: ${e.message}")
+                }
+            }
+            val progressId = resources.getIdentifier("textProgress", "id", requireContext().packageName)
+            if (progressId != 0) binding.root.findViewById<TextView>(progressId)?.text = getString(R.string.progress_percent, pct)
         }
 
         // Initialize step UI from stored value for today
         val todayDate = LocalDate.now().toString()
         stepCount = SharedPrefsHelper.getStepsForDate(requireContext(), todayDate)
-        binding.textSteps?.text = getString(R.string.steps_today, stepCount)
+        val stepsId = resources.getIdentifier("textSteps", "id", requireContext().packageName)
+        if (stepsId != 0) binding.root.findViewById<TextView>(stepsId)?.text = getString(R.string.steps_today, stepCount)
 
         // Load data for today's date
         val today = LocalDate.now().toString()
@@ -209,8 +233,8 @@ class HabitFragment : Fragment() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        // Save recycler scroll position to survive rotation
-        outState.putParcelable(KEY_RECYCLER_STATE, binding.recyclerHabits.layoutManager?.onSaveInstanceState())
+        // Save recycler state only when present in the current layout
+        binding.recyclerHabits?.layoutManager?.onSaveInstanceState()?.let { outState.putParcelable(KEY_RECYCLER_STATE, it) }
     }
 
     override fun onDestroyView() {
@@ -246,7 +270,8 @@ class HabitFragment : Fragment() {
             // Load current stored steps for today instead of resetting
             val today = LocalDate.now().toString()
             stepCount = SharedPrefsHelper.getStepsForDate(ctx, today)
-            binding.textSteps?.text = getString(R.string.steps_today, stepCount)
+            val sid = resources.getIdentifier("textSteps", "id", ctx.packageName)
+            if (sid != 0) binding.root.findViewById<TextView>(sid)?.text = getString(R.string.steps_today, stepCount)
             try {
                 sensorManager?.registerListener(stepListener, stepSensor, SensorManager.SENSOR_DELAY_NORMAL)
             } catch (_: SecurityException) {
@@ -290,7 +315,8 @@ class HabitFragment : Fragment() {
                 // Persist and get new total
                 stepCount = SharedPrefsHelper.addStepsForDate(ctx, today, delta)
                 activity?.runOnUiThread {
-                    binding.textSteps?.text = getString(R.string.steps_today, stepCount)
+                    val sid = resources.getIdentifier("textSteps", "id", ctx.packageName)
+                    if (sid != 0) binding.root.findViewById<TextView>(sid)?.text = getString(R.string.steps_today, stepCount)
                 }
                 // Refresh widget to reflect updated steps
                 WellnessWidget.updateAll(ctx)

@@ -2,40 +2,194 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widgetRoot"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="12dp">
+    android:background="@drawable/card_gradient_primary"
+    android:padding="@dimen/widget_padding">
 
-    <TextView
-        android:id="@+id/textTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:textSize="16sp"
-        android:text="@string/app_name" />
-
-    <TextView
-        android:id="@+id/textProgress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="@string/widget_progress_placeholder" />
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="@android:style/Widget.ProgressBar.Horizontal"
+    <!-- Header -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:max="100"
-        android:progress="0"
-        android:layout_marginTop="4dp"/>
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="@dimen/margin_md">
+
+        <TextView
+            android:layout_width="@dimen/icon_size_large"
+            android:layout_height="@dimen/icon_size_large"
+            android:text="🧘‍♀️"
+            android:textSize="@dimen/icon_size_medium"
+            android:gravity="center" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="@dimen/margin_sm"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Wellness"
+                android:textAppearance="@style/TextAppearance.WellnessTracker.Body"
+                android:textColor="@color/primary_700"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_widget_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Today"
+                android:textAppearance="@style/TextAppearance.WellnessTracker.Caption"
+                android:textColor="@color/primary_600" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Mood -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@color/primary_50"
+        android:padding="@dimen/padding_sm"
+        android:layout_marginBottom="@dimen/margin_sm">
+
+        <TextView
+            android:id="@+id/tv_widget_mood_emoji"
+            android:layout_width="@dimen/icon_size_large"
+            android:layout_height="@dimen/icon_size_large"
+            android:text="😊"
+            android:textSize="@dimen/icon_size_medium"
+            android:gravity="center" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="@dimen/margin_sm"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mood"
+                android:textAppearance="@style/TextAppearance.WellnessTracker.Caption"
+                android:textColor="@color/primary_600" />
+
+            <TextView
+                android:id="@+id/tv_widget_mood_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Happy"
+                android:textAppearance="@style/TextAppearance.WellnessTracker.Body"
+                android:textColor="@color/primary_700"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_widget_mood_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="8/10"
+            android:textAppearance="@style/TextAppearance.WellnessTracker.Body"
+            android:textColor="@color/primary_500"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <!-- Habits Progress -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/primary_50"
+        android:padding="@dimen/padding_sm">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="@dimen/margin_sm">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Habits"
+                android:textAppearance="@style/TextAppearance.WellnessTracker.Caption"
+                android:textColor="@color/primary_600" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="@color/primary_100"
+                android:text="" />
+
+            <TextView
+                android:id="@+id/tv_widget_habits_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="5/8 Done"
+                android:textAppearance="@style/TextAppearance.WellnessTracker.Caption"
+                android:textColor="@color/primary_500"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/habit_progress_height"
+            android:max="100"
+            android:progress="0"
+            android:indeterminate="false"
+            android:layout_marginTop="@dimen/margin_sm" />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/textSteps"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="@string/widget_steps_placeholder"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:text="0 steps"
+        android:textAppearance="@style/TextAppearance.WellnessTracker.Caption"
+        android:textColor="@color/primary_600"
+        android:layout_marginTop="@dimen/margin_md" />
+
+    <!-- Quick actions -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_md"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/btn_widget_add_mood"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🙂"
+            android:textSize="@dimen/icon_size_large"
+            android:contentDescription="Add mood" />
+
+        <TextView
+            android:id="@+id/btn_widget_view_habits"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_sm"
+            android:text="✔"
+            android:textSize="@dimen/icon_size_large"
+            android:contentDescription="View habits" />
+
+    </LinearLayout>
 
 </LinearLayout>

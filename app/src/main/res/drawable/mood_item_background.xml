@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- No fixed size: let the view determine width/height so we can size items dynamically -->
+    <!-- Use a very large corner radius so the rectangle becomes circular when the view is square -->
+    <corners android:radius="9999dp" />
+
+    <solid android:color="@color/primary_100" />
+    <stroke
+        android:width="2dp"
+        android:color="@color/primary_300" />
+</shape>

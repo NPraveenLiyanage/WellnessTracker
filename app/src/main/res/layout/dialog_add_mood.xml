@@ -1,83 +1,125 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:fillViewport="true">
 
-    <TextView
-        android:id="@+id/textPickMood"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/pick_mood"
-        android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
-
-    <GridLayout
-        android:id="@+id/gridEmojis"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:columnCount="6"
-        android:rowCount="1"
-        android:layout_marginTop="12dp">
+        android:orientation="vertical"
+        android:padding="@dimen/padding_lg"
+        android:background="@color/surface_light">
 
-        <Button
-            android:id="@+id/emojiHappy"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="0dp"
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:text="😊" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="@dimen/margin_lg">
 
-        <Button
-            android:id="@+id/emojiSmile"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="0dp"
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/pick_mood"
+                android:textAppearance="@style/TextAppearance.WellnessTracker.Title"
+                android:textColor="@color/primary_500" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/emoji_happy"
+                android:textSize="24sp"
+                android:contentDescription="@string/emoji_profile" />
+
+        </LinearLayout>
+
+        <!-- Prompt -->
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:text="🙂" />
+            android:text="@string/pick_mood"
+            android:textAppearance="@style/TextAppearance.WellnessTracker.Body"
+            android:layout_marginBottom="@dimen/margin_md" />
 
-        <Button
-            android:id="@+id/emojiNeutral"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="0dp"
+        <!-- Emoji rows container: we will add two centered horizontal rows at runtime for balanced layout -->
+        <LinearLayout
+            android:id="@+id/emoji_rows_container"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:text="😐" />
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginBottom="@dimen/margin_lg" />
 
-        <Button
-            android:id="@+id/emojiSad"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="0dp"
+        <!-- Intensity label + slider -->
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:text="😢" />
+            android:text="@string/mood_intensity_label"
+            android:textAppearance="@style/TextAppearance.WellnessTracker.Body"
+            android:layout_marginBottom="@dimen/margin_sm" />
 
-        <Button
-            android:id="@+id/emojiAngry"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="0dp"
+        <com.google.android.material.slider.Slider
+            android:id="@+id/slider_mood_intensity"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:text="😡" />
+            android:valueFrom="1"
+            android:valueTo="10"
+            android:stepSize="1"
+            android:value="5"
+            app:thumbColor="@color/primary_500"
+            app:trackColorActive="@color/primary_500"
+            app:trackColorInactive="@color/primary_200"
+            android:layout_marginBottom="@dimen/margin_lg" />
 
-        <Button
-            android:id="@+id/emojiSleep"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="0dp"
+        <!-- Notes -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:text="😴" />
-    </GridLayout>
+            android:hint="@string/note_optional"
+            app:boxStrokeColor="@color/primary_500"
+            app:hintTextColor="@color/primary_500"
+            android:layout_marginBottom="@dimen/margin_lg">
 
-    <EditText
-        android:id="@+id/editNote"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/note_optional"
-        android:inputType="textCapSentences|textMultiLine"
-        android:minLines="2"
-        android:maxLines="4"
-        android:gravity="top"
-        android:layout_marginTop="12dp" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_mood_note"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="3"
+                android:inputType="textMultiLine" />
 
-</LinearLayout>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Actions -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_cancel"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/cancel"
+                android:layout_marginEnd="@dimen/margin_sm" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_save"
+                style="@style/Widget.WellnessTracker.Button.Primary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/save"
+                app:icon="@drawable/ic_mood_24"
+                app:iconGravity="textStart" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

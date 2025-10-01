@@ -48,13 +48,19 @@ class MoodAdapter(
     }
 
     class MoodVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val emoji: TextView = itemView.findViewById(R.id.textEmoji)
-        private val dateTime: TextView = itemView.findViewById(R.id.textDateTime)
-        private val note: TextView = itemView.findViewById(R.id.textNote)
+        // Use IDs that exist in item_mood.xml
+        private val emoji: TextView = itemView.findViewById(R.id.tv_mood_emoji)
+        private val name: TextView = itemView.findViewById(R.id.tv_mood_name)
+        private val time: TextView = itemView.findViewById(R.id.tv_mood_time)
+        private val date: TextView = itemView.findViewById(R.id.tv_mood_date)
+        private val note: TextView = itemView.findViewById(R.id.tv_mood_note)
 
         fun bind(item: Mood) {
             emoji.text = item.emoji
-            dateTime.text = "${item.date} ${item.time}"
+            name.text = item.emoji // if Mood has name, replace; otherwise show emoji or mood label
+            // set date and time separately (layout provides separate fields)
+            date.text = item.date
+            time.text = item.time
             if (item.note.isNullOrEmpty()) {
                 note.visibility = View.GONE
             } else {
@@ -64,4 +70,3 @@ class MoodAdapter(
         }
     }
 }
-

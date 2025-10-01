@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    // Using ConstraintLayout Flow instead of Flexbox; Flexbox dependency removed
 
     // Navigation components
     implementation(libs.navigation.ui.ktx)

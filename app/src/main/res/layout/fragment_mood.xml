@@ -1,52 +1,324 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.MoodFragment">
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     xmlns:tools="http://schemas.android.com/tools"
+     android:layout_width="match_parent"
+     android:layout_height="match_parent"
+     android:background="?attr/colorSurface">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerMoods"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:clipToPadding="false"
-        android:padding="@dimen/spacing"
+        android:fillViewport="true"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/lineChart"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:listitem="@layout/item_mood" />
-
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/lineChart"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/chart_height"
-        android:layout_marginHorizontal="@dimen/spacing"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/buttonShare"
-        app:layout_constraintTop_toBottomOf="@id/recyclerMoods" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/buttonShare"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/share"
-        android:enabled="false"
-        android:layout_marginStart="@dimen/spacing"
-        android:layout_marginBottom="@dimen/spacing"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/padding_md">
+
+            <!-- Header Section -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.WellnessTracker.CardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/card_gradient_primary"
+                app:cardCornerRadius="@dimen/card_large_corner_radius">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/padding_lg">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="How are you feeling today?"
+                        android:textAppearance="@style/TextAppearance.WellnessTracker.Headline"
+                        android:textColor="@color/primary_700" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_sm"
+                        android:text="Track your mood and build emotional awareness"
+                        android:textAppearance="@style/TextAppearance.WellnessTracker.Body"
+                        android:textColor="@color/primary_600" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Today's Mood Selection -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.WellnessTracker.CardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_md"
+                app:cardBackgroundColor="?attr/colorSurface">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/padding_lg">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Select Your Mood"
+                        android:textAppearance="@style/TextAppearance.WellnessTracker.Title"
+                        android:drawableStart="@drawable/ic_mood_24"
+                        android:drawablePadding="@dimen/padding_sm"
+                        android:drawableTint="@color/secondary_500" />
+
+                    <!-- Mood Selection Grid -->
+                    <GridLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_md"
+                        android:columnCount="5"
+                        android:rowCount="2"
+                        android:alignmentMode="alignBounds"
+                        android:useDefaultMargins="true">
+
+                        <!-- Mood Items -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="@dimen/padding_sm"
+                            android:background="?attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:focusable="true">
+
+                            <TextView
+                                android:layout_width="@dimen/mood_item_size"
+                                android:layout_height="@dimen/mood_item_size"
+                                android:text="😊"
+                                android:textSize="@dimen/mood_emoji_size"
+                                android:gravity="center"
+                                android:background="@drawable/mood_item_background" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/margin_xs"
+                                android:text="Happy"
+                                android:textAppearance="@style/TextAppearance.WellnessTracker.Caption"
+                                android:textAlignment="center" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="@dimen/padding_sm"
+                            android:background="?attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:focusable="true">
+
+                            <TextView
+                                android:layout_width="@dimen/mood_item_size"
+                                android:layout_height="@dimen/mood_item_size"
+                                android:text="😢"
+                                android:textSize="@dimen/mood_emoji_size"
+                                android:gravity="center"
+                                android:background="@drawable/mood_item_background" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/margin_xs"
+                                android:text="Sad"
+                                android:textAppearance="@style/TextAppearance.WellnessTracker.Caption"
+                                android:textAlignment="center" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="@dimen/padding_sm"
+                            android:background="?attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:focusable="true">
+
+                            <TextView
+                                android:layout_width="@dimen/mood_item_size"
+                                android:layout_height="@dimen/mood_item_size"
+                                android:text="😠"
+                                android:textSize="@dimen/mood_emoji_size"
+                                android:gravity="center"
+                                android:background="@drawable/mood_item_background" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/margin_xs"
+                                android:text="Angry"
+                                android:textAppearance="@style/TextAppearance.WellnessTracker.Caption"
+                                android:textAlignment="center" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="@dimen/padding_sm"
+                            android:background="?attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:focusable="true">
+
+                            <TextView
+                                android:layout_width="@dimen/mood_item_size"
+                                android:layout_height="@dimen/mood_item_size"
+                                android:text="😰"
+                                android:textSize="@dimen/mood_emoji_size"
+                                android:gravity="center"
+                                android:background="@drawable/mood_item_background" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/margin_xs"
+                                android:text="Anxious"
+                                android:textAppearance="@style/TextAppearance.WellnessTracker.Caption"
+                                android:textAlignment="center" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="@dimen/padding_sm"
+                            android:background="?attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:focusable="true">
+
+                            <TextView
+                                android:layout_width="@dimen/mood_item_size"
+                                android:layout_height="@dimen/mood_item_size"
+                                android:text="😴"
+                                android:textSize="@dimen/mood_emoji_size"
+                                android:gravity="center"
+                                android:background="@drawable/mood_item_background" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/margin_xs"
+                                android:text="Tired"
+                                android:textAppearance="@style/TextAppearance.WellnessTracker.Caption"
+                                android:textAlignment="center" />
+
+                        </LinearLayout>
+
+                    </GridLayout>
+
+                    <!-- Add Note Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_add_note"
+                        style="@style/Widget.WellnessTracker.Button.Secondary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_lg"
+                        android:text="Add a note about your mood"
+                        app:icon="@drawable/ic_add_24"
+                        app:iconGravity="textStart" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Mood History -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.WellnessTracker.CardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_md"
+                app:cardBackgroundColor="?attr/colorSurface">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/padding_lg">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Recent Moods"
+                            android:textAppearance="@style/TextAppearance.WellnessTracker.Title"
+                            android:drawableStart="@drawable/ic_mood_24"
+                            android:drawablePadding="@dimen/padding_sm"
+                            android:drawableTint="@color/accent_500" />
+
+                        <com.google.android.material.button.MaterialButton
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="View All"
+                            android:textColor="@color/primary_500"
+                            android:textSize="@dimen/text_size_caption" />
+
+                    </LinearLayout>
+
+                    <!-- Mood History RecyclerView Placeholder -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_mood_history"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:layout_marginTop="@dimen/margin_md"
+                        android:clipToPadding="false"
+                        android:paddingStart="@dimen/padding_sm"
+                        android:paddingEnd="@dimen/padding_sm"
+                        tools:listitem="@layout/item_mood" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Floating Action Button anchored outside scroll -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabAddMood"
+        android:id="@+id/fab_add_mood"
+        style="@style/Widget.WellnessTracker.FloatingActionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:contentDescription="@string/add_mood"
+        android:layout_margin="@dimen/margin_lg"
+        android:contentDescription="Add mood entry"
         app:srcCompat="@drawable/ic_add_24"
-        android:layout_marginEnd="@dimen/fab_margin"
-        android:layout_marginBottom="@dimen/fab_margin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
