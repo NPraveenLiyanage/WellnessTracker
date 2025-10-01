@@ -129,4 +129,17 @@
     <string name="emoji_sleepy">😴</string>
     <string name="emoji_anxious">😰</string>
 
+    <!-- Fragment / UI strings -->
+    <string name="how_are_you_today">How are you feeling today?</string>
+    <string name="track_your_mood_desc">Track your mood and build emotional awareness</string>
+    <string name="recent_moods">Recent Moods</string>
+    <string name="add_mood_entry">Add mood entry</string>
+
+    <!-- Mood item defaults / samples -->
+    <string name="mood_name_default">Happy</string>
+    <string name="mood_rating_default">0.8</string>
+    <string name="mood_sample_note">Feeling great after morning workout!</string>
+    <string name="mood_sample_timestamp">Today • 2:30 PM</string>
+    <string name="mood_sample_timestamp_raw">2025-10-02T14:30:00Z</string>
+
 </resources>

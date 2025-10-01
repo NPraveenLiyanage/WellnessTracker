@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Overrides for tablets / large screens -->
-    <dimen name="mood_item_size">96dp</dimen>
-    <dimen name="mood_emoji_size">48dp</dimen>
-    <dimen name="mood_item_radius">48dp</dimen>
+    <!-- Overrides for larger screens (e.g., tablets) -->
+    <dimen name="recent_moods_height">420dp</dimen>
 </resources>
 

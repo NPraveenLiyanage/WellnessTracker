@@ -6,6 +6,7 @@
     android:layout_margin="@dimen/margin_sm"
     app:cardCornerRadius="@dimen/card_corner_radius"
     app:cardElevation="@dimen/card_elevation"
+    app:cardBackgroundColor="@color/background_light_secondary"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground">
@@ -22,12 +23,12 @@
             android:id="@+id/tv_mood_emoji"
             android:layout_width="@dimen/mood_item_size"
             android:layout_height="@dimen/mood_item_size"
-            android:text="😊"
+            android:text="@string/emoji_happy"
             android:textSize="@dimen/mood_emoji_size"
             android:gravity="center"
             android:background="@drawable/mood_item_background" />
 
-        <!-- Mood Details -->
+        <!-- Vertical container: three rows -> top: name+rating, middle: note, bottom: timestamp -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -35,6 +36,7 @@
             android:layout_marginStart="@dimen/margin_md"
             android:orientation="vertical">
 
+            <!-- Top row: name on the left, rating aligned to end -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -46,60 +48,52 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Happy"
+                    android:text="@string/mood_name_default"
                     android:textAppearance="@style/TextAppearance.WellnessTracker.Body"
                     android:textStyle="bold" />
 
+                <!-- Rating on the far right of top row -->
                 <TextView
-                    android:id="@+id/tv_mood_time"
+                    android:id="@+id/tv_mood_rating"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="2:30 PM"
-                    android:textAppearance="@style/TextAppearance.WellnessTracker.Caption"
-                    android:textColor="@color/primary_500" />
+                    android:layout_marginStart="@dimen/margin_md"
+                    android:text="@string/mood_rating_default"
+                    android:textAppearance="@style/TextAppearance.WellnessTracker.Title"
+                    android:textColor="@color/primary_500"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/tv_mood_date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Today"
-                android:textAppearance="@style/TextAppearance.WellnessTracker.Caption"
-                android:layout_marginTop="@dimen/margin_xs" />
-
+            <!-- Middle row: full-width note (shows the note text) -->
             <TextView
                 android:id="@+id/tv_mood_note"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Feeling great after morning workout!"
+                android:layout_marginTop="@dimen/margin_xs"
+                android:text="@string/mood_sample_note"
                 android:textAppearance="@style/TextAppearance.WellnessTracker.Body"
-                android:layout_marginTop="@dimen/margin_sm"
-                android:visibility="gone" />
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:visibility="visible" />
 
-        </LinearLayout>
-
-        <!-- Mood Rating -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center">
-
+            <!-- Bottom row: friendly timestamp -->
             <TextView
-                android:id="@+id/tv_mood_rating"
+                android:id="@+id/tv_mood_timestamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="8"
-                android:textAppearance="@style/TextAppearance.WellnessTracker.Title"
-                android:textColor="@color/primary_500"
-                android:textStyle="bold" />
+                android:layout_marginTop="@dimen/margin_xs"
+                android:text="@string/mood_sample_timestamp"
+                android:textAppearance="@style/TextAppearance.WellnessTracker.Caption"
+                android:textColor="@color/primary_500" />
 
+            <!-- Hidden raw timestamp (set at runtime with ISO/raw value for copy/share) -->
             <TextView
+                android:id="@+id/tv_mood_timestamp_raw"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="/10"
-                android:textAppearance="@style/TextAppearance.WellnessTracker.Caption" />
+                android:visibility="gone"
+                android:text="@string/mood_sample_timestamp_raw" />
 
         </LinearLayout>
 
