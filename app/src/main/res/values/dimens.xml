@@ -23,6 +23,7 @@
     <dimen name="margin_md">16dp</dimen>
     <dimen name="margin_lg">24dp</dimen>
     <dimen name="margin_xl">32dp</dimen>
+    <dimen name="margin_xxl">80dp</dimen>
 
     <!-- Card dimensions -->
     <dimen name="card_elevation">4dp</dimen>
@@ -52,13 +53,17 @@
     <dimen name="text_size_display">32sp</dimen>
 
     <!-- Bottom navigation -->
-    <dimen name="bottom_nav_height">80dp</dimen>
-    <dimen name="bottom_nav_icon_size">24dp</dimen>
+    <dimen name="bottom_nav_height">120dp</dimen>
+    <dimen name="bottom_nav_icon_size">20dp</dimen>
 
     <!-- List item heights -->
     <dimen name="list_item_height">72dp</dimen>
     <dimen name="list_item_height_small">56dp</dimen>
     <dimen name="list_item_height_large">88dp</dimen>
+
+    <!-- Header dimensions -->
+    <dimen name="header_height">96dp</dimen>
+    <dimen name="header_extra_top">12dp</dimen>
 
     <!-- Widget dimensions -->
     <dimen name="widget_corner_radius">16dp</dimen>

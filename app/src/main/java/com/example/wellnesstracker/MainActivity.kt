@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -20,7 +19,6 @@ import androidx.navigation.navOptions
 import androidx.navigation.ui.setupWithNavController
 import androidx.preference.PreferenceManager
 import com.example.wellnesstracker.databinding.ActivityMainBinding
-import com.example.wellnesstracker.WellnessWidget
 import com.example.wellnesstracker.util.HydrationScheduler
 import com.example.wellnesstracker.util.PackageUtils
 import com.example.wellnesstracker.util.SharedPrefsHelper
@@ -67,7 +65,8 @@ class MainActivity : AppCompatActivity() {
 
             // Inflate and set content view
             binding = ActivityMainBinding.inflate(layoutInflater)
-            setContentView(binding.root)
+            setContentView(binding.root) // Hide the default ActionBar to keep only the custom header with logo
+            supportActionBar?.hide()
             Log.i(TAG, "setContentView complete")
 
             // Subtle content animation
@@ -88,7 +87,20 @@ class MainActivity : AppCompatActivity() {
             // Apply window inset padding
             ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
                 val sys = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-                v.setPadding(sys.left, sys.top, sys.right, sys.bottom)
+                // Keep root view free of top inset so header sits at top edge
+                v.setPadding(sys.left, 0, sys.right, sys.bottom)
+
+                // Apply the top inset to the header so its contents are positioned below the status bar
+                try {
+                    val headerExtra = resources.getDimensionPixelSize(R.dimen.header_extra_top)
+                    val left = binding.headerBar?.paddingLeft ?: 0
+                    val right = binding.headerBar?.paddingRight ?: 0
+                    val bottom = binding.headerBar?.paddingBottom ?: 0
+                    binding.headerBar?.setPadding(left, sys.top + headerExtra, right, bottom)
+                } catch (_: Exception) {
+                }
+
+                // Return the WindowInsetsCompat to indicate we've handled insets
                 insets
             }
 

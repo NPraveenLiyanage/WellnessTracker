@@ -30,7 +30,18 @@
         <item name="colorSurfaceInverse">@color/md_theme_light_inverseSurface</item>
         <item name="colorPrimaryInverse">@color/md_theme_light_inversePrimary</item>
         <!-- Prevent Android automatic Force Dark from inverting light backgrounds to black -->
-        <item name="android:forceDarkAllowed">false</item>
+        <!-- forceDarkAllowed is provided in values-v29 to avoid minSdk issues -->
+
+        <!-- Ensure status bar icons are visible on light backgrounds (dark icons) -->
+        <item name="android:statusBarColor">@color/md_theme_light_primaryContainer</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <!-- Make navigation bar match background and use dark icons on light theme -->
+        <item name="android:navigationBarColor">@color/md_theme_light_background</item>
+        <!-- windowLightNavigationBar is provided in values-v27 to avoid minSdk issues -->
+
+        <!-- Remove the framework ActionBar by default so activities use the custom header -->
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 
     <style name="Theme.WellnessTracker" parent="Base.Theme.WellnessTracker" />
@@ -85,7 +96,27 @@
         <item name="android:textColor">@color/text_secondary_light</item>
     </style>
 
-    <!-- Bottom Navigation Style -->
+    <!-- Provide a fallback for TextAppearance.Material3.Caption if the Material library doesn't include it -->
+    <style name="TextAppearance.Material3.Caption" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textColor">@color/text_secondary_light</item>
+    </style>
+
+    <!-- Bottom navigation text styles (compact) -->
+    <style name="TextAppearance.WellnessTracker.BottomNav.Active" parent="TextAppearance.WellnessTracker.Caption">
+        <item name="android:textSize">10sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/primary_500</item>
+    </style>
+
+    <style name="TextAppearance.WellnessTracker.BottomNav.Inactive" parent="TextAppearance.WellnessTracker.Caption">
+        <item name="android:textSize">9sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textColor">@color/neutral_700</item>
+    </style>
+
+    <!-- Bottom Navigation Style (updated) -->
     <style name="Widget.WellnessTracker.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
         <item name="android:background">@drawable/bottom_nav_background</item>
         <item name="itemIconTint">@color/bottom_nav_selector</item>
@@ -93,6 +124,20 @@
         <item name="android:elevation">@dimen/card_elevation</item>
         <item name="itemIconSize">@dimen/bottom_nav_icon_size</item>
         <item name="android:minHeight">@dimen/bottom_nav_height</item>
+        <!-- breathing room -->
+        <item name="itemPaddingTop">6dp</item>
+        <item name="itemPaddingBottom">6dp</item>
+        <!-- text appearance for active/inactive labels -->
+        <item name="itemTextAppearanceActive">@style/TextAppearance.WellnessTracker.BottomNav.Active</item>
+        <item name="itemTextAppearanceInactive">@style/TextAppearance.WellnessTracker.BottomNav.Inactive</item>
+        <item name="itemTextAppearanceActiveBoldEnabled">false</item>
+    </style>
+
+    <!-- Bottom Navigation Active Indicator (small/subtle) -->
+    <style name="Widget.WellnessTracker.BottomNavigationView.ActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/primary_100</item>
+        <item name="android:width">40dp</item>
+        <item name="android:height">8dp</item>
     </style>
 
     <!-- Floating Action Button Style -->
@@ -117,17 +162,16 @@
         <item name="chipStrokeWidth">1dp</item>
     </style>
 
-    <!-- Bottom Navigation Active Indicator -->
-    <style name="Widget.WellnessTracker.BottomNavigationView.ActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
-        <item name="android:color">@color/primary_100</item>
-        <item name="android:width">64dp</item>
-        <item name="android:height">32dp</item>
-    </style>
-
     <!-- Splash theme used by SplashActivity -->
     <style name="Theme.WellnessTracker.Splash" parent="Theme.WellnessTracker">
         <!-- Use the app's splash drawable as the window background for fast launch -->
         <item name="android:windowBackground">@drawable/splash_background</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- NoActionBar variant for activities that use a custom toolbar/header -->
+    <style name="Theme.WellnessTracker.NoActionBar" parent="Theme.WellnessTracker">
+        <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
     </style>
 </resources>

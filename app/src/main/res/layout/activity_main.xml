@@ -5,18 +5,51 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_light_secondary"
+    android:background="@color/white"
     tools:context=".MainActivity">
 
     <!-- Background gradient overlay -->
     <View
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="120dp"
         android:background="@drawable/card_gradient_primary"
         android:alpha="0.1"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Top activity header: logo + app name -->
+    <LinearLayout
+        android:id="@+id/header_bar"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/header_height"
+        android:elevation="@dimen/card_elevation"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:fitsSystemWindows="false"
+        android:paddingTop="0dp"
+        android:paddingStart="@dimen/padding_md"
+        android:paddingEnd="@dimen/padding_md"
+        android:background="@color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:src="@mipmap/trans_logo"
+            android:contentDescription="@string/wellness_logo_desc" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textAppearance="@style/TextAppearance.WellnessTracker.Title"
+            android:textStyle="bold"
+            android:layout_marginStart="@dimen/margin_sm" />
+
+    </LinearLayout>
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
@@ -25,7 +58,7 @@
         android:layout_height="0dp"
         app:defaultNavHost="true"
         app:navGraph="@navigation/nav_graph"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header_bar"
         app:layout_constraintBottom_toTopOf="@+id/bottom_nav"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -35,14 +68,16 @@
         style="@style/Widget.WellnessTracker.BottomNavigationView"
         android:layout_width="0dp"
         android:layout_height="@dimen/bottom_nav_height"
-        android:layout_marginStart="@dimen/margin_md"
-        android:layout_marginEnd="@dimen/margin_md"
-        android:layout_marginBottom="@dimen/margin_md"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:menu="@menu/bottom_nav_menu"
-        app:labelVisibilityMode="labeled"
+        app:labelVisibilityMode="selected"
+        app:itemIconSize="@dimen/bottom_nav_icon_size"
+        app:itemPaddingTop="28dp"
+        app:itemPaddingBottom="12dp"
+        app:itemTextAppearanceActive="@style/TextAppearance.WellnessTracker.BottomNav.Active"
+        app:itemTextAppearanceInactive="@style/TextAppearance.WellnessTracker.BottomNav.Inactive"
         app:itemActiveIndicatorStyle="@style/Widget.WellnessTracker.BottomNavigationView.ActiveIndicator" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

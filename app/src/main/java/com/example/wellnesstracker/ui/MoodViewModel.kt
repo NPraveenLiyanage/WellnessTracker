@@ -38,5 +38,24 @@ class MoodViewModel : ViewModel() {
 
     /** Returns moods filtered to the given ISO date. */
     fun moodsForDate(date: LocalDate): List<Mood> = _moods.value.orEmpty().filter { it.date == date.toString() }
-}
 
+    /** Updates a mood at the given list position with new emoji/note, preserving date/time. */
+    fun updateMood(context: Context, position: Int, newEmoji: String, newNote: String?) {
+        val current = _moods.value.orEmpty().toMutableList()
+        if (position < 0 || position >= current.size) return
+        val old = current[position]
+        val updatedItem = Mood(date = old.date, time = old.time, emoji = newEmoji, note = newNote?.trim().takeIf { !it.isNullOrEmpty() })
+        current[position] = updatedItem
+        _moods.value = current.toList()
+        SharedPrefsHelper.saveAllMoods(context, current)
+    }
+
+    /** Deletes a mood at the given list position. */
+    fun deleteMood(context: Context, position: Int) {
+        val current = _moods.value.orEmpty().toMutableList()
+        if (position < 0 || position >= current.size) return
+        current.removeAt(position)
+        _moods.value = current.toList()
+        SharedPrefsHelper.saveAllMoods(context, current)
+    }
+}

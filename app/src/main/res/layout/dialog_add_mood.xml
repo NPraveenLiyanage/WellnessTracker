@@ -82,7 +82,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/note_optional"
             app:boxStrokeColor="@color/primary_500"
-            app:hintTextColor="@color/primary_500"
+            app:hintTextColor="@android:color/black"
             android:layout_marginBottom="@dimen/margin_lg">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -90,7 +90,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:maxLines="3"
-                android:inputType="textMultiLine" />
+                android:inputType="textMultiLine"
+                android:textColor="@android:color/black" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -107,7 +108,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/cancel"
-                android:layout_marginEnd="@dimen/margin_sm" />
+                android:layout_marginEnd="@dimen/margin_sm"
+                android:backgroundTint="@color/dialog_red_bg"
+                android:textColor="@color/dialog_red_text"
+                app:cornerRadius="8dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_save"

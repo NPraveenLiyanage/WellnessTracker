@@ -18,21 +18,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Wellness Icon -->
-        <TextView
-            android:layout_width="@dimen/icon_size_xl"
-            android:layout_height="@dimen/icon_size_xl"
-            android:text="🧘‍♀️"
-            android:textSize="32sp"
-            android:gravity="center"
-            android:background="@drawable/mood_item_background"
+        <!-- App Logo -->
+        <ImageView
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:src="@mipmap/trans_logo"
+            android:contentDescription="@string/wellness_logo_desc"
             android:layout_marginBottom="@dimen/margin_lg" />
 
         <!-- App Title -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="WellnessTracker"
+            android:text="@string/app_name"
             android:textAppearance="@style/TextAppearance.WellnessTracker.Headline"
             android:textColor="@color/primary_700"
             android:textStyle="bold"
@@ -42,7 +40,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Your journey to better wellness starts here"
+            android:text="@string/onboarding_subtitle"
             android:textAppearance="@style/TextAppearance.WellnessTracker.Body"
             android:textColor="@color/primary_600"
             android:textAlignment="center"
@@ -95,14 +93,14 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Skip" />
+                android:text="@string/skip" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonNext"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Next" />
+                android:text="@string/next" />
 
         </LinearLayout>
 

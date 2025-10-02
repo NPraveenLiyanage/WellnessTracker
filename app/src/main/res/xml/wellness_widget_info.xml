@@ -6,4 +6,3 @@
     android:initialLayout="@layout/widget_wellness"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen" />
-

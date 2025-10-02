@@ -15,6 +15,15 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Use a lightweight layout so we can animate the logo while the splash is visible.
+        setContentView(R.layout.activity_splash)
+
+        try {
+            val logo = findViewById<android.widget.ImageView>(R.id.splashLogo)
+            val anim = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.rotate)
+            logo.startAnimation(anim)
+        } catch (_: Throwable) {}
+
         // Record startup
         try {
             File(filesDir, "startup_trace.txt").appendText("Splash.onCreate\n")

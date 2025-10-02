@@ -7,6 +7,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.view.View
 import android.widget.RemoteViews
 import com.example.wellnesstracker.util.SharedPrefsHelper
 import java.io.File
@@ -18,7 +19,8 @@ class WellnessWidget : AppWidgetProvider() {
         when (intent.action) {
             Intent.ACTION_MY_PACKAGE_REPLACED,
             Intent.ACTION_DATE_CHANGED,
-            Intent.ACTION_TIME_CHANGED -> updateAll(context)
+            Intent.ACTION_TIME_CHANGED,
+            Intent.ACTION_TIMEZONE_CHANGED -> updateAll(context)
         }
     }
 
@@ -31,6 +33,10 @@ class WellnessWidget : AppWidgetProvider() {
             val percent = if (total == 0) 0 else ((done * 100f) / total).toInt()
             val stepsToday = SharedPrefsHelper.getStepsForDate(context, today)
 
+            // Load latest mood (if any)
+            val moods = SharedPrefsHelper.loadAllMoods(context)
+            val latestMood = moods.lastOrNull()
+
             val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
 
             for (appWidgetId in appWidgetIds) {
@@ -40,7 +46,36 @@ class WellnessWidget : AppWidgetProvider() {
                 views.setTextViewText(R.id.textTitle, context.getString(R.string.app_name))
                 views.setTextViewText(R.id.tv_widget_habits_progress, context.getString(R.string.widget_progress_format, percent))
                 views.setProgressBar(R.id.progressBar, 100, percent, false)
-                views.setTextViewText(R.id.textSteps, context.getString(R.string.steps_today, stepsToday))
+                // Ensure logo drawable is applied (RemoteViews may require explicit set)
+                try {
+                    views.setImageViewResource(R.id.img_logo, R.drawable.trans_logo)
+                    views.setViewVisibility(R.id.img_logo, View.VISIBLE)
+                } catch (_: Throwable) { /* ignore if resource not available at runtime */ }
+
+                // Top summary: latest mood + steps (layout now contains top summary only)
+                if (latestMood != null) {
+                    views.setTextViewText(R.id.tv_widget_mood_emoji_top, latestMood.emoji)
+                    // Show a short meaning for the emoji (e.g. "Happy", "Sad") instead of date
+                    val meaning = when (latestMood.emoji) {
+                        "😊" -> context.getString(R.string.mood_meaning_happy)
+                        "🙂" -> context.getString(R.string.mood_meaning_smile)
+                        "😐" -> context.getString(R.string.mood_meaning_neutral)
+                        "😢" -> context.getString(R.string.mood_meaning_sad)
+                        "😡" -> context.getString(R.string.mood_meaning_angry)
+                        "😠" -> context.getString(R.string.mood_meaning_mad)
+                        "😴" -> context.getString(R.string.mood_meaning_sleepy)
+                        "😰" -> context.getString(R.string.mood_meaning_anxious)
+                        else -> context.getString(R.string.widget_no_recent_mood)
+                    }
+                    views.setTextViewText(R.id.tv_widget_mood_text_top, meaning)
+                    views.setViewVisibility(R.id.tv_widget_mood_text_top, View.VISIBLE)
+                } else {
+                    views.setTextViewText(R.id.tv_widget_mood_emoji_top, "—")
+                    views.setTextViewText(R.id.tv_widget_mood_text_top, "")
+                    views.setViewVisibility(R.id.tv_widget_mood_text_top, View.GONE)
+                }
+                // Show only the numeric steps count (no "steps" label)
+                views.setTextViewText(R.id.tv_widget_steps_top, stepsToday.toString())
 
                 // Main click: open app and navigate to habits
                 val launchIntent = Intent(context, MainActivity::class.java).apply {
@@ -49,14 +84,6 @@ class WellnessWidget : AppWidgetProvider() {
                 }
                 val mainPending = PendingIntent.getActivity(context, 0, launchIntent, flags)
                 views.setOnClickPendingIntent(R.id.widgetRoot, mainPending)
-
-                // Quick action: view habits
-                val viewIntent = Intent(context, MainActivity::class.java).apply {
-                    action = MainActivity.ACTION_SHOW_HABITS
-                    putExtra(MainActivity.EXTRA_NAVIGATE_TO, "habits")
-                }
-                val viewPending = PendingIntent.getActivity(context, 1, viewIntent, flags)
-                views.setOnClickPendingIntent(R.id.btn_widget_view_habits, viewPending)
 
                 appWidgetManager.updateAppWidget(appWidgetId, views)
             }

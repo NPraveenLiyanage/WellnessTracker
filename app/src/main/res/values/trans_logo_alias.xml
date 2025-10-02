@@ -1,0 +1,5 @@
+
+<resources>
+    <!-- Alias logo to trans_logo so any use of @mipmap/logo will load the new transparent asset (@mipmap/trans_logo). -->
+    <item type="mipmap" name="logo">@mipmap/trans_logo</item>
+</resources>

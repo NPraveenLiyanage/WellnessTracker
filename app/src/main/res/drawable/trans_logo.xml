@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- outer ring (gold) -->
+    <item>
+        <shape android:shape="oval">
+            <size android:width="72dp" android:height="72dp" />
+            <solid android:color="#00000000" />
+            <stroke android:width="4dp" android:color="#D4A373" />
+        </shape>
+    </item>
+
+    <!-- inner emerald gem -->
+    <item android:left="8dp" android:top="8dp" android:right="8dp" android:bottom="8dp">
+        <shape android:shape="oval">
+            <size android:width="56dp" android:height="56dp" />
+            <solid android:color="#19A974" />
+            <gradient android:startColor="#1ABF85" android:endColor="#0A8A5A" android:angle="270" />
+        </shape>
+    </item>
+</layer-list>

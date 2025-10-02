@@ -1,5 +1,6 @@
 package com.example.wellnesstracker.ui
 
+import android.app.Dialog
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -10,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
+import androidx.core.view.isEmpty
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -73,13 +75,20 @@ class MoodFragment : Fragment() {
 
         try {
             // RecyclerView setup
-            adapter = MoodAdapter { mood, position ->
-                // Persist selection visually and enable the Share button
-                selectedMood = mood
-                selectedPosition = position
-                adapter.setSelected(position)
-                binding.buttonShare?.isEnabled = true
-            }
+            adapter = MoodAdapter(
+                { mood, position ->
+                    // Open edit form when item clicked
+                    selectedMood = mood
+                    selectedPosition = position
+                    adapter.setSelected(position)
+                    binding.buttonShare?.isEnabled = true
+                    showEditMoodDialog(mood, position)
+                },
+                { mood, position ->
+                    // Long-press -> confirm delete
+                    confirmDeleteMood(mood, position)
+                }
+            )
 
             // Use whichever RecyclerView exists in this layout (land: recyclerMoods, port: rv_mood_history)
             val recycler: RecyclerView? = binding.recyclerMoods ?: binding.rvMoodHistory
@@ -142,8 +151,8 @@ class MoodFragment : Fragment() {
 
     /** Shows dialog to pick an emoji and optionally enter a note. */
     private fun showAddMoodDialog() {
-        // Inflate dialog view
-        val dialogView = layoutInflater.inflate(R.layout.dialog_add_mood, null)
+        // Inflate dialog view (attachToRoot = false)
+        val dialogView = layoutInflater.inflate(R.layout.dialog_add_mood, binding.root as ViewGroup, false)
         val editNote = dialogView.findViewById<EditText>(R.id.et_mood_note)
         val emojiRowsContainer = dialogView.findViewById<android.widget.LinearLayout>(R.id.emoji_rows_container)
         val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btn_cancel)
@@ -166,23 +175,20 @@ class MoodFragment : Fragment() {
         val defaultSize = resources.getDimensionPixelSize(R.dimen.mood_item_size)
         val emojiTextSizePx = resources.getDimension(R.dimen.mood_emoji_size)
 
-        // Compute available width using padding from layout (padding_lg applied to root LinearLayout)
+        // Compute available width using padding from layout
         val innerPadding = resources.getDimensionPixelSize(R.dimen.padding_lg)
         val availableWidth = (dialogWidth - innerPadding * 2).coerceAtLeast(0)
 
-        // Decide how many columns to aim for so rows are balanced (prefer two near-even rows)
         val n = emojis.size
-        val desiredTwoRowCols = (n + 1) / 2 // ceil(n/2)
+        val desiredTwoRowCols = (n + 1) / 2
         val approxCols = (availableWidth / (defaultSize + marginPx * 2)).coerceAtLeast(1)
         val columns = if (approxCols >= desiredTwoRowCols) desiredTwoRowCols.coerceAtMost(n) else approxCols.coerceAtMost(n)
 
-        // Compute tile size
         val totalMarginSpace = columns * marginPx * 2
         var sizePx = ((availableWidth - totalMarginSpace) / columns).coerceAtLeast((defaultSize / 3)).coerceAtMost(defaultSize)
         val minFromText = (emojiTextSizePx * 1.8f).toInt().coerceAtLeast((defaultSize * 0.35f).toInt())
         if (sizePx < minFromText) sizePx = minFromText
 
-        // Prepare two horizontal row containers (centered)
         emojiRowsContainer?.removeAllViews()
         val row1 = android.widget.LinearLayout(requireContext()).apply {
             orientation = android.widget.LinearLayout.HORIZONTAL
@@ -195,7 +201,6 @@ class MoodFragment : Fragment() {
             layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         }
 
-        // Split emojis into two balanced rows: first 'columns' items in row1, the rest in row2
         val firstRowCount = columns.coerceAtMost(n)
         val secondRowStart = firstRowCount
 
@@ -246,8 +251,7 @@ class MoodFragment : Fragment() {
             }
         }
 
-        // If second row is empty, center first row only; otherwise add both rows (spacing handled by container)
-        if (row2.childCount == 0) {
+        if (row2.isEmpty()) {
             emojiRowsContainer?.addView(row1)
         } else {
             emojiRowsContainer?.addView(row1)
@@ -261,6 +265,164 @@ class MoodFragment : Fragment() {
             val emoji = chosenEmoji
             if (emoji.isNullOrEmpty()) return@setOnClickListener
             viewModel.addMood(requireContext(), emoji, editNote?.text?.toString())
+            dialog.dismiss()
+        }
+    }
+
+    /** Shows an edit dialog pre-filled for the given mood at position. */
+    private fun showEditMoodDialog(mood: Mood, position: Int) {
+        // Inflate edit dialog view (attachToRoot = false)
+        val dialogView = layoutInflater.inflate(R.layout.dialog_add_mood, binding.root as ViewGroup, false)
+        val editNote = dialogView.findViewById<EditText>(R.id.et_mood_note)
+        val emojiRowsContainer = dialogView.findViewById<android.widget.LinearLayout>(R.id.emoji_rows_container)
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btn_cancel)
+        val btnSave = dialogView.findViewById<MaterialButton>(R.id.btn_save)
+
+        val emojis = listOf("😊", "🙂", "😐", "😢", "😡", "😠", "😴", "😰")
+
+        // Prefill note
+        editNote?.setText(mood.note)
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        dialog.show()
+
+        val screenWidth = resources.displayMetrics.widthPixels
+        val dialogWidth = (screenWidth * 0.95).toInt()
+        dialog.window?.setLayout(dialogWidth, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val marginPx = (2 * resources.displayMetrics.density).toInt()
+        val defaultSize = resources.getDimensionPixelSize(R.dimen.mood_item_size)
+        val emojiTextSizePx = resources.getDimension(R.dimen.mood_emoji_size)
+        val innerPadding = resources.getDimensionPixelSize(R.dimen.padding_lg)
+        val availableWidth = (dialogWidth - innerPadding * 2).coerceAtLeast(0)
+
+        val n = emojis.size
+        val desiredTwoRowCols = (n + 1) / 2
+        val approxCols = (availableWidth / (defaultSize + marginPx * 2)).coerceAtLeast(1)
+        val columns = if (approxCols >= desiredTwoRowCols) desiredTwoRowCols.coerceAtMost(n) else approxCols.coerceAtMost(n)
+
+        val totalMarginSpace = columns * marginPx * 2
+        var sizePx = ((availableWidth - totalMarginSpace) / columns).coerceAtLeast((defaultSize / 3)).coerceAtMost(defaultSize)
+        val minFromText = (emojiTextSizePx * 1.8f).toInt().coerceAtLeast((defaultSize * 0.35f).toInt())
+        if (sizePx < minFromText) sizePx = minFromText
+
+        emojiRowsContainer?.removeAllViews()
+        val row1 = android.widget.LinearLayout(requireContext()).apply {
+            orientation = android.widget.LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER
+            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        }
+        val row2 = android.widget.LinearLayout(requireContext()).apply {
+            orientation = android.widget.LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER
+            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        }
+
+        val firstRowCount = columns.coerceAtMost(n)
+        val secondRowStart = firstRowCount
+
+        var chosenEmoji: String? = mood.emoji
+        var selectedView: View? = null
+
+        fun makeEmojiView(emoji: String): TextView {
+            val tv = TextView(requireContext()).apply {
+                text = emoji
+                contentDescription = "Mood: $emoji"
+                gravity = android.view.Gravity.CENTER
+                textAlignment = View.TEXT_ALIGNMENT_CENTER
+                includeFontPadding = true
+                val horiz = (2 * resources.displayMetrics.density).toInt()
+                val vert = (6 * resources.displayMetrics.density).toInt()
+                setPadding(horiz, vert, horiz, vert)
+                setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, emojiTextSizePx)
+                setBackgroundResource(R.drawable.mood_item_background)
+                isClickable = true
+                isFocusable = true
+            }
+            val lp = android.widget.LinearLayout.LayoutParams(sizePx, sizePx).apply {
+                setMargins(marginPx, marginPx, marginPx, marginPx)
+            }
+            tv.layoutParams = lp
+            tv.minWidth = sizePx
+            tv.minHeight = sizePx
+
+            // If this is the mood's current emoji, mark it selected
+            if (emoji == mood.emoji) {
+                tv.scaleX = 1.12f
+                tv.scaleY = 1.12f
+                selectedView = tv
+            }
+
+            tv.setOnClickListener { v ->
+                selectedView?.scaleX = 1f
+                selectedView?.scaleY = 1f
+                v.scaleX = 1.12f
+                v.scaleY = 1.12f
+                selectedView = v
+                chosenEmoji = emoji
+            }
+            return tv
+        }
+
+        for (i in 0 until firstRowCount) {
+            val tv = makeEmojiView(emojis[i])
+            row1.addView(tv)
+        }
+        if (secondRowStart < n) {
+            for (i in secondRowStart until n) {
+                val tv = makeEmojiView(emojis[i])
+                row2.addView(tv)
+            }
+        }
+
+        if (row2.isEmpty()) {
+            emojiRowsContainer?.addView(row1)
+        } else {
+            emojiRowsContainer?.addView(row1)
+            emojiRowsContainer?.addView(row2)
+        }
+
+        btnCancel?.setOnClickListener { dialog.dismiss() }
+        btnSave?.setOnClickListener {
+            val emoji = chosenEmoji
+            if (emoji.isNullOrEmpty()) return@setOnClickListener
+            viewModel.updateMood(requireContext(), position, emoji, editNote?.text?.toString())
+            dialog.dismiss()
+        }
+    }
+
+    private fun confirmDeleteMood(mood: Mood, position: Int) {
+        // Inflate custom delete dialog layout
+        val dialogView = layoutInflater.inflate(R.layout.dialog_delete_habit, binding.root as ViewGroup, false)
+
+        // Use a plain Dialog and set the custom view as its content. Use transparent background so
+        // only the card is visible (no AlertDialog chrome).
+        val dialog = Dialog(requireContext())
+        dialog.setContentView(dialogView)
+        dialog.setCancelable(true)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
+
+        // Populate message with mood info
+        val msgView = dialogView.findViewById<TextView>(R.id.dialogDeleteMessage)
+        msgView?.text = getString(R.string.delete_mood_confirm_with_info, mood.emoji, mood.date, mood.time)
+
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btn_dialog_cancel)
+        val btnDelete = dialogView.findViewById<MaterialButton>(R.id.btn_dialog_delete)
+
+        btnCancel?.setOnClickListener { dialog.dismiss() }
+        btnDelete?.setOnClickListener {
+            // perform deletion and persist
+            viewModel.deleteMood(requireContext(), position)
+            // clear selection if it was the deleted one
+            if (position == selectedPosition) {
+                selectedPosition = -1
+                selectedMood = null
+                binding.buttonShare?.isEnabled = false
+            }
             dialog.dismiss()
         }
     }
@@ -279,77 +441,77 @@ class MoodFragment : Fragment() {
 
     private fun setupChart() {
         binding.lineChart?.apply {
-            description.isEnabled = false
-            setNoDataText(getString(R.string.no_mood_data))
-            axisRight.isEnabled = false
-            axisLeft.apply {
-                axisMinimum = 0f
-                axisMaximum = 5.5f
-                granularity = 1f
-            }
-            xAxis.apply {
-                position = XAxis.XAxisPosition.BOTTOM
-                granularity = 1f
-                setDrawGridLines(false)
-                valueFormatter = object : ValueFormatter() {
-                    override fun getAxisLabel(value: Float, axis: AxisBase?): String {
-                        val idx = value.toInt()
-                        val dates = last7Days()
-                        return dates.getOrNull(idx)?.toString()?.substring(5) ?: ""
-                    }
-                }
-            }
-            legend.isEnabled = false
-        }
-    }
+             description.isEnabled = false
+             setNoDataText(getString(R.string.no_mood_data))
+             axisRight.isEnabled = false
+             axisLeft.apply {
+                 axisMinimum = 0f
+                 axisMaximum = 5.5f
+                 granularity = 1f
+             }
+             xAxis.apply {
+                 position = XAxis.XAxisPosition.BOTTOM
+                 granularity = 1f
+                 setDrawGridLines(false)
+                 valueFormatter = object : ValueFormatter() {
+                     override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+                         val idx = value.toInt()
+                         val dates = last7Days()
+                         return dates.getOrNull(idx)?.toString()?.substring(5) ?: ""
+                     }
+                 }
+             }
+             legend.isEnabled = false
+         }
+     }
 
-    private fun updateChart(allMoods: List<Mood>) {
+     private fun updateChart(allMoods: List<Mood>) {
         binding.lineChart?.let { chart ->
-            val days = last7Days()
+             val days = last7Days()
 
-            fun score(emoji: String): Int = when (emoji) {
-                "😊" -> 5
-                "🙂" -> 4
-                "😐" -> 3
-                "😢" -> 2
-                "😡", "😠" -> 1
-                "😴" -> 2
-                "😰" -> 2
-                else -> 3
-            }
+             fun score(emoji: String): Int = when (emoji) {
+                 "😊" -> 5
+                 "🙂" -> 4
+                 "😐" -> 3
+                 "😢" -> 2
+                 "😡", "😠" -> 1
+                 "😴" -> 2
+                 "😰" -> 2
+                 else -> 3
+             }
 
-            val entries = mutableListOf<Entry>()
-            var anyData = false
-            days.forEachIndexed { index, date ->
-                val dayMoods = allMoods.filter { it.date == date.toString() }
-                if (dayMoods.isNotEmpty()) {
-                    anyData = true
-                    val avg = dayMoods.map { score(it.emoji) }.average().toFloat()
-                    entries.add(Entry(index.toFloat(), avg))
-                } else {
-                    entries.add(Entry(index.toFloat(), Float.NaN))
-                }
-            }
+             val entries = mutableListOf<Entry>()
+             var anyData = false
+             days.forEachIndexed { index, date ->
+                 val dayMoods = allMoods.filter { it.date == date.toString() }
+                 if (dayMoods.isNotEmpty()) {
+                     anyData = true
+                     val avg = dayMoods.map { score(it.emoji) }.average().toFloat()
+                     entries.add(Entry(index.toFloat(), avg))
+                 } else {
+                     entries.add(Entry(index.toFloat(), Float.NaN))
+                 }
+             }
 
-            if (!anyData) {
-                chart.clear()
-                chart.invalidate()
-                return
-            }
+             if (!anyData) {
+                 chart.clear()
+                 chart.invalidate()
+                 return
+             }
 
-            val dataSet = LineDataSet(entries, "").apply {
-                mode = LineDataSet.Mode.CUBIC_BEZIER
-                setDrawCircles(true)
-                circleRadius = 3f
-                setDrawValues(false)
-                color = requireContext().getColor(R.color.primary_500)
-                setCircleColor(color)
-                lineWidth = 2f
-            }
-            chart.data = LineData(dataSet)
-            chart.invalidate()
-        }
-    }
+             val dataSet = LineDataSet(entries, "").apply {
+                 mode = LineDataSet.Mode.CUBIC_BEZIER
+                 setDrawCircles(true)
+                 circleRadius = 3f
+                 setDrawValues(false)
+                 color = requireContext().getColor(R.color.primary_500)
+                 setCircleColor(color)
+                 lineWidth = 2f
+             }
+             chart.data = LineData(dataSet)
+             chart.invalidate()
+         }
+     }
 
     /** Returns a list of the last 7 LocalDate values (oldest first, includes today). */
     private fun last7Days(): List<LocalDate> {

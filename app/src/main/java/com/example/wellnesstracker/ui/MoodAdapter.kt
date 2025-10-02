@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -17,7 +18,8 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class MoodAdapter(
-    private val onClick: (Mood, Int) -> Unit
+    private val onClick: (Mood, Int) -> Unit,
+    private val onLongClick: ((Mood, Int) -> Unit)? = null
 ) : ListAdapter<Mood, MoodAdapter.MoodVH>(DIFF) {
 
     companion object {
@@ -51,6 +53,15 @@ class MoodAdapter(
         holder.itemView.setOnClickListener {
             onClick(item, position)
         }
+        holder.itemView.setOnLongClickListener {
+            // If a long-click handler is provided, invoke it and consume the event
+            if (onLongClick != null) {
+                onLongClick.invoke(item, position)
+                true
+            } else {
+                false
+            }
+        }
     }
 
     class MoodVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -62,6 +73,9 @@ class MoodAdapter(
         private val note: TextView = itemView.findViewById(R.id.tv_mood_note)
         private val rating: TextView = itemView.findViewById(R.id.tv_mood_rating)
 
+        // Progress bar for visual rating and percentage text
+        private val progressBar: android.widget.ProgressBar = itemView.findViewById(R.id.pb_mood_rating)
+        private val percentage: TextView = itemView.findViewById(R.id.tv_mood_percentage)
         private val friendlyTimeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.getDefault())
         private val friendlyDateFormatter = DateTimeFormatter.ofPattern("MMM d", Locale.getDefault())
 
@@ -102,16 +116,17 @@ class MoodAdapter(
                 val today = LocalDate.now()
                 val friendlyDate = if (localDate == today) "Today" else localDate.format(friendlyDateFormatter)
                 val friendlyTime = ldt.format(friendlyTimeFormatter)
-                timestamp.text = "$friendlyDate • $friendlyTime"
+                // Use translatable resource for timestamp formatting
+                timestamp.text = itemView.context.getString(R.string.mood_timestamp_format, friendlyDate, friendlyTime)
 
                 // Raw ISO instant in UTC (use system zone to convert)
                 val instant = ldt.atZone(ZoneId.systemDefault()).toInstant()
                 timestampRaw.text = DateTimeFormatter.ISO_INSTANT.format(instant)
 
-            } catch (t: Throwable) {
-                // Fallback to whatever strings were provided
-                timestamp.text = "${item.date} ${item.time}"
-                timestampRaw.text = "${item.date}T${item.time}:00Z"
+            } catch (_: Throwable) {
+                // Fallback to whatever strings were provided, use translatable fallback
+                timestamp.text = itemView.context.getString(R.string.mood_timestamp_fallback, item.date, item.time)
+                timestampRaw.text = itemView.context.getString(R.string.mood_timestamp_raw_format, item.date, item.time)
             }
 
             // Note visibility
@@ -122,10 +137,26 @@ class MoodAdapter(
                 note.text = item.note
             }
 
-            // Compute rating as decimal between 0.0 - 1.0 based on 5-point scale and display with one decimal (e.g., 0.8)
+            // Compute score 1..5 and translate to percent 0..100
             val score = scoreForEmoji(item.emoji)
-            val decimal = score / 5.0
-            rating.text = String.format(Locale.getDefault(), "%.1f", decimal)
+
+            val percent = (score * 100) / 5
+            try {
+                progressBar.progress = percent
+                // Choose color: green (good) for 4-5, amber for 3, red for 1-2
+                val colorRes = when {
+                    score >= 4 -> R.color.primary_500
+                    score == 3 -> R.color.warning
+                    else -> R.color.error
+                }
+                val tint = ContextCompat.getColorStateList(itemView.context, colorRes)
+                progressBar.progressTintList = tint
+                // Update percentage text and color to match
+                percentage.text = itemView.context.getString(R.string.percent_format, percent)
+                percentage.setTextColor(ContextCompat.getColor(itemView.context, colorRes))
+            } catch (_: Throwable) {
+                /* ignore if view not present */
+            }
         }
     }
 }

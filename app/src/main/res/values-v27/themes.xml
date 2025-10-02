@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- API-specific overrides for SDK >= 27 -->
+    <style name="Base.Theme.WellnessTracker" parent="Theme.Material3.DayNight">
+        <!-- Enable light navigation bar icons on light backgrounds (requires API 27+) -->
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+</resources>
+

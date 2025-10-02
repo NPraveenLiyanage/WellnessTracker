@@ -16,20 +16,8 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/lineChart"
-        app:layout_constraintHorizontal_weight="1"
-        tools:listitem="@layout/item_mood" />
-
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/lineChart"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_margin="@dimen/spacing"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/buttonShare"
-        app:layout_constraintStart_toEndOf="@id/recyclerMoods"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_weight="1" />
+        tools:listitem="@layout/item_mood" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonShare"

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">WellnessTracker</string>
+    <string name="app_name">Lumora</string>
 
     <!-- Bottom nav titles -->
     <string name="menu_habits">Habits</string>
@@ -19,8 +19,18 @@
     <string name="habit_name">Habit name</string>
     <string name="habit_name_required">Please enter a name</string>
     <string name="cancel">Cancel</string>
-    <string name="save">Save</string>
-    <string name="empty_habits">No habits yet. Tap + to add one.</string>
+
+    <!-- Wellness Settings -->
+    <string name="wellness_settings">Wellness Settings</string>
+    <string name="customize_wellness_journey">Customize your wellness journey</string>
+    <string name="health">Health</string>
+    <string name="fitness">Fitness</string>
+    <string name="mind">Mind</string>
+    <string name="settings_icon_desc">Settings icon</string>
+    <string name="health_tracking_desc">Health tracking</string>
+    <string name="fitness_tracking_desc">Fitness tracking</string>
+    <string name="mindfulness_practices_desc">Mindfulness practices</string>
+    <string name="wellness_logo_desc">Wellness logo</string>
 
     <!-- Mood -->
     <string name="add_mood">Add mood</string>
@@ -50,6 +60,7 @@
     <string name="widget_progress_format">Today: %1$d%%</string>
     <string name="widget_progress_placeholder">Today: 0%%</string>
     <string name="widget_steps_placeholder">Steps today: 0</string>
+    <string name="widget_no_recent_mood">No recent mood</string>
 
     <!-- Formatting helpers -->
     <string name="progress_percent">%1$d%%</string>
@@ -60,6 +71,8 @@
     <!-- Delete confirmation -->
     <string name="confirm_delete_habit">Delete this habit?</string>
     <string name="delete">Delete</string>
+    <string name="delete_mood_confirm">Delete this mood entry?</string>
+    <string name="delete_mood_confirm_with_info">Delete this mood entry?\n%1$s  %2$s %3$s</string>
     <string name="habit_deleted">Habit deleted</string>
     <string name="undo">Undo</string>
 
@@ -80,6 +93,7 @@
     <string name="skip">Skip</string>
     <string name="next">Next</string>
     <string name="get_started">Get started</string>
+    <string name="onboarding_subtitle">Your journey to better wellness starts here</string>
 
     <!-- Safe-mode strings -->
     <string name="safe_mode_title">WellnessTracker (Safe Mode)</string>
@@ -123,6 +137,12 @@
     <string name="app_version">1.0.0</string>
     <string name="terms_privacy">Terms of Service &amp; Privacy Policy</string>
 
+    <!-- Added strings for settings UI -->
+    <string name="about_app">About</string>
+    <string name="sign_out">Sign out</string>
+    <string name="reminders_enabled">Reminders enabled</string>
+    <string name="reminders_disabled">Reminders disabled</string>
+
     <!-- Emoji resources -->
     <string name="emoji_profile">👤</string>
 
@@ -135,6 +155,16 @@
     <string name="emoji_mad">😠</string>
     <string name="emoji_sleepy">😴</string>
     <string name="emoji_anxious">😰</string>
+
+    <!-- Short, user-facing meanings for the emoji (used in widget) -->
+    <string name="mood_meaning_happy">Happy</string>
+    <string name="mood_meaning_smile">Content</string>
+    <string name="mood_meaning_neutral">Neutral</string>
+    <string name="mood_meaning_sad">Sad</string>
+    <string name="mood_meaning_angry">Angry</string>
+    <string name="mood_meaning_mad">Frustrated</string>
+    <string name="mood_meaning_sleepy">Sleepy</string>
+    <string name="mood_meaning_anxious">Anxious</string>
 
     <!-- Fragment / UI strings -->
     <string name="how_are_you_today">How are you feeling today?</string>
@@ -170,4 +200,23 @@
     <string name="habit_sample_name">Drink Water</string>
     <string name="habit_sample_description">Stay hydrated throughout the day</string>
     <string name="habit_streak_placeholder">7</string>
+
+    <!-- Mood timestamp formats -->
+    <string name="mood_timestamp_format">%1$s • %2$s</string>
+    <string name="mood_timestamp_fallback">%1$s %2$s</string>
+    <string name="mood_timestamp_raw_format">%1$sT%2$s:00Z</string>
+
+    <!-- Percentage formatting for mood rating -->
+    <string name="percent_format">%1$d%%</string>
+    <string name="percent_zero">0%</string>
+
+    <!-- Missing strings referenced by layouts -->
+    <string name="save">Save</string>
+    <string name="empty_habits">No habits yet. Create your first habit to get started.</string>
+
+    <!-- Hydration interval UI strings -->
+    <string name="pref_hydration_interval_instructions">Choose how often you want to be reminded to drink water. Shorter intervals increase reminder frequency.</string>
+    <string name="pref_hydration_interval_button">Set</string>
+    <string name="hydration">Hydration</string>
+    <string name="pref_hydration_interval_input_hint">Interval in minutes (e.g. 60)</string>
 </resources>
