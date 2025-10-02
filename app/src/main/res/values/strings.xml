@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">WellnessTracker</string>
 
@@ -59,6 +60,12 @@
     <!-- Delete confirmation -->
     <string name="confirm_delete_habit">Delete this habit?</string>
     <string name="delete">Delete</string>
+    <string name="habit_deleted">Habit deleted</string>
+    <string name="undo">Undo</string>
+
+    <!-- All habits dialog -->
+    <string name="all_habits">All Habits</string>
+    <string name="close">Close</string>
 
     <!-- Steps display (transient) -->
     <string name="steps_today">Steps today: %1$d</string>
@@ -142,4 +149,25 @@
     <string name="mood_sample_timestamp">Today • 2:30 PM</string>
     <string name="mood_sample_timestamp_raw">2025-10-02T14:30:00Z</string>
 
+    <!-- HabitFragment and fragment_habit.xml strings -->
+    <string name="habits_done_progress">%1$d/%2$d Done</string>
+    <string name="build_better_habits">Build Better Habits</string>
+    <string name="habit_header_desc">Track your daily habits and build a healthier lifestyle</string>
+    <string name="overall_progress">Overall Progress</string>
+    <string name="todays_habits">Today\'s Habits</string>
+    <string name="view_all_habits">View All Habits</string>
+    <string name="weekly_progress">Weekly Progress</string>
+    <string name="mon">Mon</string>
+    <string name="tue">Tue</string>
+    <string name="wed">Wed</string>
+    <string name="thu">Thu</string>
+    <string name="fri">Fri</string>
+    <string name="sat">Sat</string>
+    <string name="sun">Sun</string>
+
+    <!-- Habit item defaults / samples -->
+    <string name="emoji_habit_default">💧</string>
+    <string name="habit_sample_name">Drink Water</string>
+    <string name="habit_sample_description">Stay hydrated throughout the day</string>
+    <string name="habit_streak_placeholder">7</string>
 </resources>

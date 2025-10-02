@@ -56,6 +56,61 @@ object SharedPrefsHelper {
         return next
     }
 
+    // --- Habit helpers across dates (new) ---
+
+    /** Loads habits for all dates. */
+    fun loadAllHabits(context: Context): MutableList<Habit> {
+        val p = prefs(context)
+        val result = mutableListOf<Habit>()
+        for ((key, value) in p.all) {
+            if (key.startsWith(KEY_HABITS_PREFIX) && value is String) {
+                try {
+                    val type = object : TypeToken<MutableList<Habit>>() {}.type
+                    val list: MutableList<Habit>? = Gson().fromJson(value, type)
+                    if (list != null) result.addAll(list)
+                } catch (_: Exception) { /* ignore malformed */ }
+            }
+        }
+        return result
+    }
+
+    /** Sets completion for a habit by id on the specific date. Returns true if updated. */
+    fun setHabitCompleted(context: Context, date: String, id: Int, completed: Boolean): Boolean {
+        val list = loadHabitsForDate(context, date)
+        var changed = false
+        val updated = list.map {
+            if (it.id == id) {
+                changed = it.completed != completed
+                it.copy(completed = completed)
+            } else it
+        }
+        if (changed) saveHabitsForDate(context, date, updated)
+        return changed
+    }
+
+    /** Updates habit name by id on the specific date. Returns true if updated. */
+    fun setHabitName(context: Context, date: String, id: Int, newName: String): Boolean {
+        val list = loadHabitsForDate(context, date)
+        var changed = false
+        val updated = list.map {
+            if (it.id == id) {
+                changed = it.name != newName
+                it.copy(name = newName)
+            } else it
+        }
+        if (changed) saveHabitsForDate(context, date, updated)
+        return changed
+    }
+
+    /** Deletes habit by id for the specific date. Returns true if deleted. */
+    fun deleteHabit(context: Context, date: String, id: Int): Boolean {
+        val list = loadHabitsForDate(context, date)
+        val newList = list.filterNot { it.id == id }
+        val changed = newList.size != list.size
+        if (changed) saveHabitsForDate(context, date, newList)
+        return changed
+    }
+
     // --- Mood persistence ---
 
     /** Loads all moods ever saved. Returns an empty mutable list if missing or malformed. */

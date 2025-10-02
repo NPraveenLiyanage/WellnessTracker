@@ -1,14 +1,11 @@
 package com.example.wellnesstracker.ui
 
-import android.content.Context
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
+import android.app.DatePickerDialog
+import android.graphics.drawable.ColorDrawable
+import android.graphics.Color
 import android.os.Bundle
-import android.os.Parcelable
-import android.text.InputType
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
@@ -22,14 +19,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.wellnesstracker.R
 import com.example.wellnesstracker.WellnessWidget
 import com.example.wellnesstracker.databinding.FragmentHabitBinding
-import com.example.wellnesstracker.model.Mood
+import com.example.wellnesstracker.model.Habit
 import com.example.wellnesstracker.util.SharedPrefsHelper
+import android.app.Dialog
+import android.view.WindowManager
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.transition.MaterialFadeThrough
+import com.google.android.material.progressindicator.LinearProgressIndicator
+import com.google.android.material.snackbar.Snackbar
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import android.util.Log
 
 class HabitFragment : Fragment() {
     private var _binding: FragmentHabitBinding? = null
@@ -38,203 +36,70 @@ class HabitFragment : Fragment() {
     private val viewModel: HabitViewModel by viewModels()
     private lateinit var adapter: HabitAdapter
 
-    // Save transient scroll state across rotation
-    private var recyclerState: Parcelable? = null
-
-    // Optional: accelerometer-based shake detection to auto-add a mood
-    private var sensorManager: SensorManager? = null
-    private var lastAccel = 0f
-    private var accel = 0f
-    private var accelCurrent = SensorManager.GRAVITY_EARTH
-    private var lastShakeTime = 0L
-
-    // Step counter state (TYPE_STEP_DETECTOR fallback). Transient while the fragment is active.
-    private var stepCount: Int = 0
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        // Smooth fade transitions between tabs
-        enterTransition = MaterialFadeThrough()
-        exitTransition = MaterialFadeThrough()
-        recyclerState = savedInstanceState?.getParcelable(KEY_RECYCLER_STATE)
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHabitBinding.inflate(inflater, container, false)
         return binding.root
     }
 
-    /** Loads habits for today and updates RecyclerView. */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // RecyclerView setup
         adapter = HabitAdapter(
             onChecked = { habit, checked ->
-                viewModel.setCompleted(habit.id, checked)
+                viewModel.setCompleted(requireContext(), habit.id, checked)
                 persistAndRefreshWidget()
             },
-            onClick = { habit ->
-                // Single tap: edit
-                showEditHabitDialog(habit.id, habit.name)
-            },
-            onLongPressed = { habit ->
-                // Long press: confirm deletion
-                showDeleteHabitDialog(habit.id, habit.name)
-            }
+            onClick = { habit -> showEditHabitDialog(habit.id, habit.name, habit.date) },
+            onLongPressed = { habit -> showDeleteHabitDialog(habit.id, habit.name) }
         )
-        val layoutManager = LinearLayoutManager(requireContext())
-        binding.recyclerHabits?.layoutManager = layoutManager
-        binding.recyclerHabits?.adapter = adapter
 
-        // Restore recycler scroll position after rotation
-        recyclerState?.let { state ->
-            binding.recyclerHabits?.post { layoutManager.onRestoreInstanceState(state) }
-        }
+        binding.recyclerHabits.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerHabits.adapter = adapter
 
-        // Swipe-to-delete
-        val touchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean = false
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val pos = viewHolder.bindingAdapterPosition
+        val swipe = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+            override fun onMove(rv: RecyclerView, vh: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean = false
+            override fun onSwiped(vh: RecyclerView.ViewHolder, dir: Int) {
+                val pos = vh.bindingAdapterPosition
                 val item = adapter.currentList.getOrNull(pos)
                 if (item != null) {
-                    viewModel.deleteHabit(item.id)
+                    viewModel.deleteHabit(requireContext(), item.id)
                     persistAndRefreshWidget()
                 }
             }
-        })
-        // Attach only if RecyclerView exists in this layout variant
-        binding.recyclerHabits?.let { rv ->
-            touchHelper.attachToRecyclerView(rv)
+
+            override fun isLongPressDragEnabled(): Boolean = false
+        }
+        ItemTouchHelper(swipe).attachToRecyclerView(binding.recyclerHabits)
+
+        binding.fabAdd.apply {
+            bringToFront()
+            translationZ = 20f
+            elevation = 20f
+            isClickable = true
+            isFocusable = true
         }
 
-        // FAB add habit
-        binding.fabAdd?.setOnClickListener { showAddHabitDialog() }
+        binding.fabAdd.setOnClickListener { showAddHabitDialog() }
+        binding.btnViewAllHabits?.setOnClickListener { showAllHabitsDialog() }
 
-        // Observe data
         viewModel.habits.observe(viewLifecycleOwner) { list ->
+            // Show all habits in the main list (user requested all, not only today's)
             adapter.submitList(list)
-            // Empty state handling — handle layouts that may not include the empty view
-            val emptyId = resources.getIdentifier("textEmpty", "id", requireContext().packageName)
-            if (emptyId != 0) binding.root.findViewById<View>(emptyId).isVisible = list.isEmpty()
-        }
-        viewModel.progress.observe(viewLifecycleOwner) { pct ->
-            // Try multiple APIs via reflection to set progress across different Material versions
-            binding.progressBar?.let { pb ->
-                try {
-                    val m = pb.javaClass.getMethod("setProgress", Int::class.javaPrimitiveType)
-                    m.invoke(pb, pct)
-                } catch (nsme: NoSuchMethodException) {
-                    try {
-                        val m2 = pb.javaClass.getMethod("setProgressCompat", Int::class.javaPrimitiveType, Boolean::class.javaPrimitiveType)
-                        m2.invoke(pb, pct, false)
-                    } catch (e: Exception) {
-                        // Last resort: try setProgress via kotlin property if exposed, else log and ignore
-                        Log.w("HabitFragment", "Unable to set progress on progressBar view: ${e.message}")
-                    }
-                } catch (e: Exception) {
-                    Log.w("HabitFragment", "Failed to set progress on progressBar: ${e.message}")
-                }
-            }
-            val progressId = resources.getIdentifier("textProgress", "id", requireContext().packageName)
-            if (progressId != 0) binding.root.findViewById<TextView>(progressId)?.text = getString(R.string.progress_percent, pct)
+            binding.textEmpty?.isVisible = list.isEmpty()
+            updateProgressUI(list)
+
+            val total = list.size
+            val done = list.count { it.completed }
+            val pct = if (total == 0) 0 else ((done * 100f) / total).toInt()
+            binding.textProgress.text = getString(R.string.progress_percent, pct)
+            binding.root.findViewById<LinearProgressIndicator>(R.id.progressBar)?.setProgressCompat(pct, true)
         }
 
-        // Initialize step UI from stored value for today
-        val todayDate = LocalDate.now().toString()
-        stepCount = SharedPrefsHelper.getStepsForDate(requireContext(), todayDate)
-        val stepsId = resources.getIdentifier("textSteps", "id", requireContext().packageName)
-        if (stepsId != 0) binding.root.findViewById<TextView>(stepsId)?.text = getString(R.string.steps_today, stepCount)
-
-        // Load data for today's date
-        val today = LocalDate.now().toString()
-        viewModel.load(requireContext(), today)
-    }
-
-    /** Shows dialog to add a new habit. */
-    private fun showAddHabitDialog() {
-        val input = EditText(requireContext()).apply {
-            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
-            hint = getString(R.string.habit_name)
+        viewModel.weekly.observe(viewLifecycleOwner) { values ->
+            updateWeeklyChart(values)
         }
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.add_habit)
-            .setView(input)
-            .setNegativeButton(R.string.cancel, null)
-            .setPositiveButton(R.string.save) { _, _ ->
-                val name = input.text?.toString()?.trim().orEmpty()
-                if (name.isNotEmpty()) {
-                    val nameNotNull = name
-                    val id = viewModel.addHabit(requireContext(), nameNotNull)
-                    adapter.animateNextAdded(id)
-                    persistAndRefreshWidget()
-                } else {
-                    input.error = getString(R.string.habit_name_required)
-                }
-            }
-            .show()
-    }
 
-    /** Shows dialog to edit an existing habit. */
-    private fun showEditHabitDialog(id: Int, currentName: String) {
-        val input = EditText(requireContext()).apply {
-            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
-            setText(currentName)
-            setSelection(currentName.length)
-        }
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.edit_habit)
-            .setView(input)
-            .setNegativeButton(R.string.cancel, null)
-            .setPositiveButton(R.string.save) { _, _ ->
-                val newName = input.text?.toString()?.trim().orEmpty()
-                if (newName.isNotEmpty()) {
-                    viewModel.editHabit(id, newName)
-                    persistAndRefreshWidget()
-                } else {
-                    input.error = getString(R.string.habit_name_required)
-                }
-            }
-            .show()
-    }
-
-    /** Shows dialog to confirm deletion of a habit. */
-    private fun showDeleteHabitDialog(id: Int, name: String) {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(name)
-            .setMessage(getString(R.string.confirm_delete_habit))
-            .setNegativeButton(R.string.cancel, null)
-            .setPositiveButton(R.string.delete) { _, _ ->
-                viewModel.deleteHabit(id)
-                persistAndRefreshWidget()
-            }
-            .show()
-    }
-
-    /** Persists changes when leaving the screen. */
-    override fun onPause() {
-        super.onPause()
-        viewModel.save(requireContext())
-        unregisterShake()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        registerShake()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        // Save recycler state only when present in the current layout
-        binding.recyclerHabits?.layoutManager?.onSaveInstanceState()?.let { outState.putParcelable(KEY_RECYCLER_STATE, it) }
+        viewModel.load(requireContext(), LocalDate.now().toString())
     }
 
     override fun onDestroyView() {
@@ -242,105 +107,266 @@ class HabitFragment : Fragment() {
         _binding = null
     }
 
-    private fun persistAndRefreshWidget() {
-        // Save immediately so the widget can reflect the latest state
-        viewModel.save(requireContext())
-        // Update widget to show today's progress
-        WellnessWidget.updateAll(requireContext())
-    }
+    private fun showAddHabitDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_add_habit, null)
+        val input = dialogView.findViewById<EditText>(R.id.edit_habit_input)
+        val tvDate = dialogView.findViewById<TextView>(R.id.tv_habit_date)
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btn_dialog_cancel)
+        val btnSave = dialogView.findViewById<MaterialButton>(R.id.btn_dialog_save)
 
-    // --- Optional: Shake detection to auto-add a neutral mood entry ---
+        var selectedDate = LocalDate.now().toString()
+        tvDate.text = selectedDate
 
-    private fun registerShake() {
-        val ctx = context ?: return
-        sensorManager = ctx.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val accelerometer = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) ?: return
-        accel = 0.0f
-        accelCurrent = SensorManager.GRAVITY_EARTH
-        lastAccel = SensorManager.GRAVITY_EARTH
-        sensorManager?.registerListener(shakeListener, accelerometer, SensorManager.SENSOR_DELAY_UI)
-
-        // Try to register a step detector to count steps in this fragment while visible.
-        val stepSensor = try {
-            sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
-        } catch (e: SecurityException) {
-            null
+        tvDate.setOnClickListener {
+            val base = try { LocalDate.parse(selectedDate) } catch (_: Exception) { LocalDate.now() }
+            val year = base.year
+            val month = base.monthValue - 1
+            val day = base.dayOfMonth
+            val dp = DatePickerDialog(requireContext(), { _, y, m, d ->
+                val picked = LocalDate.of(y, m + 1, d)
+                selectedDate = picked.toString()
+                tvDate.text = selectedDate
+            }, year, month, day)
+            dp.show()
         }
-        if (stepSensor != null) {
-            // Load current stored steps for today instead of resetting
-            val today = LocalDate.now().toString()
-            stepCount = SharedPrefsHelper.getStepsForDate(ctx, today)
-            val sid = resources.getIdentifier("textSteps", "id", ctx.packageName)
-            if (sid != 0) binding.root.findViewById<TextView>(sid)?.text = getString(R.string.steps_today, stepCount)
-            try {
-                sensorManager?.registerListener(stepListener, stepSensor, SensorManager.SENSOR_DELAY_NORMAL)
-            } catch (_: SecurityException) {
-                // Ignore if permission isn't granted on newer Android; step sensor then won't be available.
+
+        val dialog = Dialog(requireContext())
+        dialog.setContentView(dialogView)
+        dialog.setCancelable(true)
+        dialog.show()
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window?.setDimAmount(0f)
+        dialog.window?.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        val dlgWidth = (resources.displayMetrics.widthPixels * 0.92).toInt()
+        dialog.window?.setLayout(dlgWidth, WindowManager.LayoutParams.WRAP_CONTENT)
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+        btnSave.setOnClickListener {
+            val name = input.text?.toString()?.trim().orEmpty()
+            if (name.isNotEmpty()) {
+                val id = viewModel.addHabit(requireContext(), name, selectedDate)
+                if (id > 0) adapter.animateNextAdded(id)
+                persistAndRefreshWidget()
+                Snackbar.make(binding.root, R.string.add_habit, Snackbar.LENGTH_SHORT).show()
+                dialog.dismiss()
+            } else {
+                input.error = getString(R.string.habit_name_required)
             }
         }
     }
 
-    private fun unregisterShake() {
-        sensorManager?.unregisterListener(shakeListener)
-        sensorManager?.unregisterListener(stepListener)
-    }
+    private fun showEditHabitDialog(id: Int, currentName: String, currentDate: String, onSaved: (() -> Unit)? = null) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_habit, null)
+        val input = dialogView.findViewById<EditText>(R.id.edit_habit_input)
+        val tvDate = dialogView.findViewById<TextView>(R.id.tv_habit_date)
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btn_dialog_cancel)
+        val btnSave = dialogView.findViewById<MaterialButton>(R.id.btn_dialog_save)
+        input.setText(currentName)
+        input.setSelection(currentName.length)
 
-    private val shakeListener = object : SensorEventListener {
-        override fun onSensorChanged(event: SensorEvent) {
-            val x = event.values[0]
-            val y = event.values[1]
-            val z = event.values[2]
-            lastAccel = accelCurrent
-            accelCurrent = kotlin.math.sqrt((x * x + y * y + z * z).toDouble()).toFloat()
-            val delta = accelCurrent - lastAccel
-            accel = accel * 0.9f + delta // low-cut filter
+        var selectedDate = currentDate
+        tvDate.text = selectedDate
+        tvDate.setOnClickListener {
+            val base = try { LocalDate.parse(selectedDate) } catch (_: Exception) { LocalDate.now() }
+            val year = base.year
+            val month = base.monthValue - 1
+            val day = base.dayOfMonth
+            val dp = DatePickerDialog(requireContext(), { _, y, m, d ->
+                val picked = LocalDate.of(y, m + 1, d)
+                selectedDate = picked.toString()
+                tvDate.text = selectedDate
+            }, year, month, day)
+            dp.show()
+        }
 
-            val now = System.currentTimeMillis()
-            if (accel > 8f && now - lastShakeTime > 2000) { // threshold and 2s debounce
-                lastShakeTime = now
-                addAutoMood()
+        val dialog = Dialog(requireContext())
+        dialog.setContentView(dialogView)
+        dialog.setCancelable(true)
+        dialog.show()
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window?.setDimAmount(0f)
+        dialog.window?.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        val dlgWidth2 = (resources.displayMetrics.widthPixels * 0.92).toInt()
+        dialog.window?.setLayout(dlgWidth2, WindowManager.LayoutParams.WRAP_CONTENT)
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+        btnSave.setOnClickListener {
+            val newName = input.text?.toString()?.trim().orEmpty()
+            if (newName.isNotEmpty()) {
+                // Persist name and date (move if date changed)
+                viewModel.updateHabit(requireContext(), id, newName, selectedDate)
+                persistAndRefreshWidget()
+                Snackbar.make(binding.root, R.string.edit_habit, Snackbar.LENGTH_SHORT).show()
+                dialog.dismiss()
+                onSaved?.invoke()
+            } else {
+                input.error = getString(R.string.habit_name_required)
             }
         }
-        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
     }
 
-    // Step detector listener: increments a transient step counter and updates UI
-    private val stepListener = object : SensorEventListener {
-        override fun onSensorChanged(event: SensorEvent) {
-            // TYPE_STEP_DETECTOR typically reports 1.0 for each step (or a small count)
-            val delta = event.values?.sumOf { it.toDouble() }?.toInt() ?: 0
-            if (delta > 0) {
-                val ctx = context ?: return
-                val today = LocalDate.now().toString()
-                // Persist and get new total
-                stepCount = SharedPrefsHelper.addStepsForDate(ctx, today, delta)
-                activity?.runOnUiThread {
-                    val sid = resources.getIdentifier("textSteps", "id", ctx.packageName)
-                    if (sid != 0) binding.root.findViewById<TextView>(sid)?.text = getString(R.string.steps_today, stepCount)
-                }
-                // Refresh widget to reflect updated steps
+    private fun showDeleteHabitDialog(id: Int, name: String, onDeleted: (() -> Unit)? = null) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_delete_habit, null)
+        val titleView = dialogView.findViewById<TextView>(R.id.dialogDeleteTitle)
+        val msgView = dialogView.findViewById<TextView>(R.id.dialogDeleteMessage)
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btn_dialog_cancel)
+        val btnDelete = dialogView.findViewById<MaterialButton>(R.id.btn_dialog_delete)
+        titleView.text = name
+        msgView.text = getString(R.string.confirm_delete_habit)
+
+        val dialog = Dialog(requireContext())
+        dialog.setContentView(dialogView)
+        dialog.setCancelable(true)
+        dialog.show()
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window?.setDimAmount(0f)
+        dialog.window?.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        val dlgWidth3 = (resources.displayMetrics.widthPixels * 0.92).toInt()
+        dialog.window?.setLayout(dlgWidth3, WindowManager.LayoutParams.WRAP_CONTENT)
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+        btnDelete.setOnClickListener {
+            viewModel.deleteHabit(requireContext(), id)
+            persistAndRefreshWidget()
+            Snackbar.make(binding.root, R.string.habit_deleted, Snackbar.LENGTH_LONG).show()
+            dialog.dismiss()
+            onDeleted?.invoke()
+        }
+    }
+
+    private fun showAllHabitsDialog() {
+        val ctx = requireContext()
+        val dialogView = layoutInflater.inflate(R.layout.dialog_all_habits, null)
+        val rv = dialogView.findViewById<RecyclerView>(R.id.recyclerAllHabits)
+        rv.layoutManager = LinearLayoutManager(ctx)
+
+        var all = SharedPrefsHelper.loadAllHabits(ctx)
+        lateinit var allAdapter: AllHabitsAdapter
+        allAdapter = AllHabitsAdapter(
+            onToggle = { habit, checked ->
+                SharedPrefsHelper.setHabitCompleted(ctx, habit.date, habit.id, checked)
+                all = SharedPrefsHelper.loadAllHabits(ctx)
+                allAdapter.submitList(all.toList())
+                viewModel.load(ctx, LocalDate.now().toString())
                 WellnessWidget.updateAll(ctx)
+            },
+            onEdit = { habit ->
+                // Use our custom edit dialog (with date picker)
+                showEditHabitDialog(habit.id, habit.name, habit.date) {
+                    all = SharedPrefsHelper.loadAllHabits(ctx)
+                    allAdapter.submitList(all.toList())
+                    viewModel.load(ctx, LocalDate.now().toString())
+                    WellnessWidget.updateAll(ctx)
+                }
+            },
+            onDelete = { habit ->
+                // Use our custom delete dialog
+                showDeleteHabitDialog(habit.id, habit.name) {
+                    all = SharedPrefsHelper.loadAllHabits(ctx)
+                    allAdapter.submitList(all.toList())
+                    viewModel.load(ctx, LocalDate.now().toString())
+                    WellnessWidget.updateAll(ctx)
+                }
+            }
+        )
+        rv.adapter = allAdapter
+        allAdapter.submitList(all.toList())
+
+        val allDialog = Dialog(ctx)
+        allDialog.setContentView(dialogView)
+        allDialog.setCancelable(true)
+        allDialog.show()
+        allDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        allDialog.window?.setDimAmount(0f)
+        allDialog.window?.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        val allWidth = (resources.displayMetrics.widthPixels * 0.94).toInt()
+        val allHeight = (resources.displayMetrics.heightPixels * 0.78).toInt()
+        allDialog.window?.setLayout(allWidth, allHeight)
+    }
+
+    private fun updateProgressUI(list: List<Habit>) {
+        val total = list.size
+        val done = list.count { it.completed }
+        binding.chipSummary?.text = getString(R.string.habits_done_progress, done, total)
+    }
+
+    private fun updateWeeklyChart(values: List<Int>) {
+        if (values.size != 7) return
+        val root = binding.root
+        val container = root.findViewById<View>(R.id.weeklyChartContainer) ?: return
+
+        // Map values (oldest..newest) into fixed Mon..Sun slots using weeklyDates
+        val weekdayPercents = IntArray(7) { 0 } // 0=Mon .. 6=Sun
+        val dates = viewModel.weeklyDates.value
+        if (dates != null && dates.size == 7) {
+            for (i in values.indices) {
+                try {
+                    val d = LocalDate.parse(dates[i])
+                    val idx = (d.dayOfWeek.value - 1).coerceIn(0, 6)
+                    weekdayPercents[idx] = values[i].coerceIn(0, 100)
+                } catch (_: Exception) {
+                    // ignore parse error and skip
+                }
+            }
+        } else {
+            // fallback: compute exact dates for oldest..newest and map
+            val base = LocalDate.now()
+            for (i in values.indices) {
+                val offset = 6 - i
+                val d = base.minusDays(offset.toLong())
+                val idx = (d.dayOfWeek.value - 1).coerceIn(0, 6)
+                weekdayPercents[idx] = values[i].coerceIn(0, 100)
             }
         }
 
-        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
-    }
-
-    private fun addAutoMood() {
-        val ctx = context ?: return
-        val list = SharedPrefsHelper.loadAllMoods(ctx)
-        val now = LocalDateTime.now()
-        val newMood = Mood(
-            date = now.toLocalDate().toString(),
-            time = now.format(DateTimeFormatter.ofPattern("HH:mm")),
-            emoji = "\uD83D\uDE42",
-            note = getString(R.string.added_by_shake)
+        // Update fixed Mon..Sun labels and bars
+        val shortDays = arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+        val labelIds = listOf(
+            R.id.label_mon,
+            R.id.label_tue,
+            R.id.label_wed,
+            R.id.label_thu,
+            R.id.label_fri,
+            R.id.label_sat,
+            R.id.label_sun
         )
-        list.add(0, newMood)
-        SharedPrefsHelper.saveAllMoods(ctx, list)
+
+        for (i in 0..6) {
+            val tv = root.findViewById<TextView>(labelIds[i])
+            tv?.let {
+                it.text = "${shortDays[i]}\n${weekdayPercents[i]}%"
+                it.maxLines = 2
+                it.textAlignment = View.TEXT_ALIGNMENT_CENTER
+            }
+        }
+
+        // Ensure measurements are available; run after layout
+        container.post {
+            fun setBarHeight(viewId: Int, percent: Int) {
+                val bar = root.findViewById<View>(viewId) ?: return
+                val parentFrame = bar.parent
+                val maxHeight = if (parentFrame is View) parentFrame.height else container.height
+                val minPx = (6 * resources.displayMetrics.density).toInt()
+                val px = ((percent / 100f) * maxHeight).toInt().coerceAtLeast(minPx)
+                val lp = bar.layoutParams
+                lp.height = px
+                bar.layoutParams = lp
+                bar.requestLayout()
+            }
+
+            setBarHeight(R.id.bar_mon, weekdayPercents[0])
+            setBarHeight(R.id.bar_tue, weekdayPercents[1])
+            setBarHeight(R.id.bar_wed, weekdayPercents[2])
+            setBarHeight(R.id.bar_thu, weekdayPercents[3])
+            setBarHeight(R.id.bar_fri, weekdayPercents[4])
+            setBarHeight(R.id.bar_sat, weekdayPercents[5])
+            setBarHeight(R.id.bar_sun, weekdayPercents[6])
+        }
     }
 
-    companion object {
-        private const val KEY_RECYCLER_STATE = "habit_recycler_state"
+    private fun persistAndRefreshWidget() {
+        viewModel.save(requireContext())
+        viewModel.recalcWeekly(requireContext())
+        WellnessWidget.updateAll(requireContext())
     }
 }

@@ -7,6 +7,7 @@ import android.view.animation.AlphaAnimation
 import com.google.android.material.checkbox.MaterialCheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
+import android.widget.Toast
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.wellnesstracker.R
@@ -17,6 +18,9 @@ class HabitAdapter(
     private val onClick: (habit: Habit) -> Unit,
     private val onLongPressed: (habit: Habit) -> Unit
 ) : ListAdapter<Habit, HabitAdapter.HabitVH>(DIFF) {
+
+    // track expanded item ids so description can expand/collapse
+    private val expandedIds = mutableSetOf<Int>()
 
     companion object {
         private val DIFF = object : DiffUtil.ItemCallback<Habit>() {
@@ -49,9 +53,10 @@ class HabitAdapter(
         }
     }
 
-    class HabitVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class HabitVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val name: TextView = itemView.findViewById(R.id.tv_habit_name)
         private val check: MaterialCheckBox = itemView.findViewById(R.id.cb_habit_completed)
+        private val desc: TextView? = itemView.findViewById(R.id.tv_habit_description)
 
         fun bind(
             item: Habit,
@@ -60,14 +65,42 @@ class HabitAdapter(
             onLongPressed: (Habit) -> Unit
         ) {
             name.text = item.name
-            check.setOnCheckedChangeListener(null)
-            check.isChecked = item.completed
-            check.setOnCheckedChangeListener { _, isChecked -> onChecked(item, isChecked) }
+            // placeholder: description not persisted in model; if added later it will show here
+            desc?.text = ""
 
-            itemView.setOnClickListener {
-                onClick(item)
+            // set maxLines based on expanded state
+            if (expandedIds.contains(item.id)) {
+                desc?.maxLines = Int.MAX_VALUE
+            } else {
+                desc?.maxLines = 1
             }
 
+            // toggle expanded state when description is clicked
+            desc?.setOnClickListener {
+                if (expandedIds.contains(item.id)) expandedIds.remove(item.id) else expandedIds.add(item.id)
+                val pos = bindingAdapterPosition
+                if (pos != RecyclerView.NO_POSITION) notifyItemChanged(pos)
+            }
+
+            // Reset checkbox listener and state
+            check.setOnCheckedChangeListener(null)
+            check.isChecked = item.completed
+
+            // Use the checked change listener so the checkbox behaves normally and still notifies the callback.
+            check.setOnCheckedChangeListener { _, isChecked ->
+                name.alpha = if (isChecked) 0.6f else 1.0f
+                // brief toast for debugging so you can see the change in the UI
+                Toast.makeText(itemView.context, if (isChecked) "Completed" else "Not completed", Toast.LENGTH_SHORT).show()
+                onChecked(item, isChecked)
+            }
+
+            // Consume long clicks on the checkbox so they don't propagate to the item (prevent delete dialog)
+            check.setOnLongClickListener { true }
+
+            // Item clicks / long-clicks
+            itemView.isClickable = true
+            itemView.isLongClickable = true
+            itemView.setOnClickListener { onClick(item) }
             itemView.setOnLongClickListener {
                 onLongPressed(item)
                 true

@@ -52,7 +52,14 @@
     <color name="success">#4CAF50</color>
     <color name="warning">#FF9800</color>
     <color name="error">#F44336</color>
+    <color name="error_600">#E53935</color>
     <color name="info">#2196F3</color>
+
+    <!-- Dialog accent colors -->
+    <color name="dialog_blue_bg">#E8F4FF</color>
+    <color name="dialog_blue_text">#0B63D6</color>
+    <color name="dialog_red_bg">#FFECEC</color>
+    <color name="dialog_red_text">#C62828</color>
 
     <!-- Background Colors -->
     <color name="background_light">#FFFFFF</color>

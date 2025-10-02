@@ -25,7 +25,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/card_gradient_secondary"
-                app:cardCornerRadius="@dimen/card_large_corner_radius">
+                app:cardCornerRadius="@dimen/card_large_corner_radius"
+                app:cardBackgroundColor="@color/background_light">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -36,7 +37,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Build Better Habits"
+                        android:text="@string/build_better_habits"
                         android:textAppearance="@style/TextAppearance.WellnessTracker.Headline"
                         android:textColor="@color/secondary_700" />
 
@@ -44,7 +45,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/margin_sm"
-                        android:text="Track your daily habits and build a healthier lifestyle"
+                        android:text="@string/habit_header_desc"
                         android:textAppearance="@style/TextAppearance.WellnessTracker.Body"
                         android:textColor="@color/secondary_600" />
 
@@ -57,7 +58,8 @@
                 style="@style/Widget.WellnessTracker.CardView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_md">
+                android:layout_marginTop="@dimen/margin_md"
+                app:cardBackgroundColor="@color/background_light">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -72,20 +74,22 @@
                         android:gravity="center_vertical">
 
                         <TextView
-                            android:id="@+id/textProgress"
+                            android:id="@+id/textProgressLabel"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Overall Progress"
+                            android:text="@string/overall_progress"
                             android:textAppearance="@style/TextAppearance.WellnessTracker.Title" />
 
                         <TextView
+                            android:id="@+id/textProgress"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="63%"
+                            android:text="@string/zero_percent"
                             android:textAppearance="@style/TextAppearance.WellnessTracker.Body"
                             android:textColor="@color/primary_500"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            tools:text="63%" />
 
                     </LinearLayout>
 
@@ -95,7 +99,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/margin_sm"
-                        android:progress="63" />
+                        tools:progress="63" />
 
                 </LinearLayout>
 
@@ -106,7 +110,8 @@
                 style="@style/Widget.WellnessTracker.CardView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_md">
+                android:layout_marginTop="@dimen/margin_md"
+                app:cardBackgroundColor="@color/background_light">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -124,129 +129,50 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Today's Habits"
+                            android:text="@string/todays_habits"
                             android:textAppearance="@style/TextAppearance.WellnessTracker.Title"
-                            android:drawableStart="@drawable/ic_habits_24"
+                            app:drawableStartCompat="@drawable/ic_habits_24"
                             android:drawablePadding="@dimen/padding_sm"
-                            android:drawableTint="@color/secondary_500" />
+                            app:drawableTint="@color/secondary_500" />
 
                         <com.google.android.material.chip.Chip
+                            android:id="@+id/chipSummary"
                             style="@style/Widget.WellnessTracker.Chip"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="5/8 Done"
+                            tools:text="5/8 Done"
                             android:textSize="@dimen/text_size_caption" />
 
                     </LinearLayout>
 
-                    <!-- Sample Habit Items (static placeholders) -->
-                    <LinearLayout
+                    <!-- RecyclerView to display today's habits -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerHabits"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/margin_md"
-                        android:orientation="vertical">
+                        android:overScrollMode="ifContentScrolls"
+                        android:nestedScrollingEnabled="false" />
 
-                        <!-- Habit Item 1 -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="@dimen/list_item_height_small"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:background="?attr/selectableItemBackground"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:padding="@dimen/padding_sm">
-
-                            <com.google.android.material.checkbox.MaterialCheckBox
-                                android:layout_width="@dimen/habit_checkbox_size"
-                                android:layout_height="@dimen/habit_checkbox_size"
-                                android:checked="true"
-                                app:buttonTint="@color/primary_500" />
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:layout_marginStart="@dimen/margin_md"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Drink 8 glasses of water"
-                                    android:textAppearance="@style/TextAppearance.WellnessTracker.Body" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Goal: 8 glasses • Current: 6 glasses"
-                                    android:textAppearance="@style/TextAppearance.WellnessTracker.Caption" />
-
-                            </LinearLayout>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="💧"
-                                android:textSize="@dimen/icon_size_large" />
-
-                        </LinearLayout>
-
-                        <!-- Habit Item 2 -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="@dimen/list_item_height_small"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:background="?attr/selectableItemBackground"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:padding="@dimen/padding_sm">
-
-                            <com.google.android.material.checkbox.MaterialCheckBox
-                                android:layout_width="@dimen/habit_checkbox_size"
-                                android:layout_height="@dimen/habit_checkbox_size"
-                                android:checked="false"
-                                app:buttonTint="@color/primary_500" />
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:layout_marginStart="@dimen/margin_md"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="30 minutes exercise"
-                                    android:textAppearance="@style/TextAppearance.WellnessTracker.Body" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Goal: 30 min • Current: 0 min"
-                                    android:textAppearance="@style/TextAppearance.WellnessTracker.Caption" />
-
-                            </LinearLayout>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="🏃‍♂️"
-                                android:textSize="@dimen/icon_size_large" />
-
-                        </LinearLayout>
-
-                    </LinearLayout>
+                    <!-- Empty state -->
+                    <TextView
+                        android:id="@+id/textEmpty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_sm"
+                        android:text="@string/empty_habits"
+                        android:textAppearance="@style/TextAppearance.WellnessTracker.Caption"
+                        android:textAlignment="center"
+                        android:visibility="gone" />
 
                     <!-- View All Habits Button -->
                     <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnViewAllHabits"
                         style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/margin_md"
-                        android:text="View All Habits"
+                        android:text="@string/view_all_habits"
                         app:strokeColor="@color/primary_300"
                         android:textColor="@color/primary_500" />
 
@@ -259,7 +185,8 @@
                 style="@style/Widget.WellnessTracker.CardView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_md">
+                android:layout_marginTop="@dimen/margin_md"
+                app:cardBackgroundColor="@color/background_light">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -270,14 +197,15 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Weekly Progress"
+                        android:text="@string/weekly_progress"
                         android:textAppearance="@style/TextAppearance.WellnessTracker.Title"
-                        android:drawableStart="@drawable/ic_habits_24"
+                        app:drawableStartCompat="@drawable/ic_habits_24"
                         android:drawablePadding="@dimen/padding_sm"
-                        android:drawableTint="@color/accent_500" />
+                        app:drawableTint="@color/accent_500" />
 
                     <!-- Weekly Chart Placeholder -->
                     <LinearLayout
+                        android:id="@+id/weeklyChartContainer"
                         android:layout_width="match_parent"
                         android:layout_height="120dp"
                         android:layout_marginTop="@dimen/margin_md"
@@ -285,210 +213,242 @@
                         android:gravity="bottom"
                         android:baselineAligned="false">
 
-                        <!-- Day column: use a container with match_parent width so inner fixed-width bar isn't considered 'invisible' by lint -->
+                        <!-- Each day column: weight=1, FrameLayout fills available vertical space -->
+
+                        <!-- Monday -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:orientation="vertical"
-                            android:gravity="center">
+                            android:gravity="bottom|center_horizontal">
 
                             <FrameLayout
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
+                                android:layout_height="0dp"
+                                android:layout_weight="1">
 
                                 <View
+                                    android:id="@+id/bar_mon"
                                     android:layout_width="20dp"
-                                    android:layout_height="80dp"
-                                    android:layout_gravity="center"
+                                    android:layout_height="4dp"
+                                    android:layout_gravity="bottom|center_horizontal"
                                     android:background="@color/primary_300" />
 
                             </FrameLayout>
 
                             <TextView
+                                android:id="@+id/label_mon"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="@dimen/margin_xs"
-                                android:text="Mon"
+                                android:text="@string/mon"
                                 android:textAppearance="@style/TextAppearance.WellnessTracker.Caption" />
 
                         </LinearLayout>
 
-                        <!-- Tue -->
+                        <!-- Tuesday -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:orientation="vertical"
-                            android:gravity="center">
+                            android:gravity="bottom|center_horizontal">
 
                             <FrameLayout
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
+                                android:layout_height="0dp"
+                                android:layout_weight="1">
 
                                 <View
+                                    android:id="@+id/bar_tue"
                                     android:layout_width="20dp"
-                                    android:layout_height="95dp"
-                                    android:layout_gravity="center"
+                                    android:layout_height="4dp"
+                                    android:layout_gravity="bottom|center_horizontal"
                                     android:background="@color/primary_400" />
 
                             </FrameLayout>
 
                             <TextView
+                                android:id="@+id/label_tue"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="@dimen/margin_xs"
-                                android:text="Tue"
+                                android:text="@string/tue"
                                 android:textAppearance="@style/TextAppearance.WellnessTracker.Caption" />
 
                         </LinearLayout>
 
-                        <!-- Wed -->
+                        <!-- Wednesday -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:orientation="vertical"
-                            android:gravity="center">
+                            android:gravity="bottom|center_horizontal">
 
                             <FrameLayout
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
+                                android:layout_height="0dp"
+                                android:layout_weight="1">
 
                                 <View
+                                    android:id="@+id/bar_wed"
                                     android:layout_width="20dp"
-                                    android:layout_height="70dp"
-                                    android:layout_gravity="center"
+                                    android:layout_height="4dp"
+                                    android:layout_gravity="bottom|center_horizontal"
                                     android:background="@color/primary_300" />
 
                             </FrameLayout>
 
                             <TextView
+                                android:id="@+id/label_wed"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="@dimen/margin_xs"
-                                android:text="Wed"
+                                android:text="@string/wed"
                                 android:textAppearance="@style/TextAppearance.WellnessTracker.Caption" />
 
                         </LinearLayout>
 
-                        <!-- Thu -->
+                        <!-- Thursday -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:orientation="vertical"
-                            android:gravity="center">
+                            android:gravity="bottom|center_horizontal">
 
                             <FrameLayout
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
+                                android:layout_height="0dp"
+                                android:layout_weight="1">
 
                                 <View
+                                    android:id="@+id/bar_thu"
                                     android:layout_width="20dp"
-                                    android:layout_height="100dp"
-                                    android:layout_gravity="center"
+                                    android:layout_height="4dp"
+                                    android:layout_gravity="bottom|center_horizontal"
                                     android:background="@color/primary_500" />
 
                             </FrameLayout>
 
                             <TextView
+                                android:id="@+id/label_thu"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="@dimen/margin_xs"
-                                android:text="Thu"
+                                android:text="@string/thu"
                                 android:textAppearance="@style/TextAppearance.WellnessTracker.Caption" />
 
                         </LinearLayout>
 
-                        <!-- Fri -->
+                        <!-- Friday -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:orientation="vertical"
-                            android:gravity="center">
+                            android:gravity="bottom|center_horizontal">
 
                             <FrameLayout
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
+                                android:layout_height="0dp"
+                                android:layout_weight="1">
 
                                 <View
+                                    android:id="@+id/bar_fri"
                                     android:layout_width="20dp"
-                                    android:layout_height="85dp"
-                                    android:layout_gravity="center"
+                                    android:layout_height="4dp"
+                                    android:layout_gravity="bottom|center_horizontal"
                                     android:background="@color/primary_400" />
 
                             </FrameLayout>
 
                             <TextView
+                                android:id="@+id/label_fri"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="@dimen/margin_xs"
-                                android:text="Fri"
+                                android:text="@string/fri"
                                 android:textAppearance="@style/TextAppearance.WellnessTracker.Caption" />
 
                         </LinearLayout>
 
-                        <!-- Sat -->
+                        <!-- Saturday -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:orientation="vertical"
-                            android:gravity="center">
+                            android:gravity="bottom|center_horizontal">
 
                             <FrameLayout
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
+                                android:layout_height="0dp"
+                                android:layout_weight="1">
 
                                 <View
+                                    android:id="@+id/bar_sat"
                                     android:layout_width="20dp"
-                                    android:layout_height="60dp"
-                                    android:layout_gravity="center"
+                                    android:layout_height="4dp"
+                                    android:layout_gravity="bottom|center_horizontal"
                                     android:background="@color/primary_200" />
 
                             </FrameLayout>
 
                             <TextView
+                                android:id="@+id/label_sat"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="@dimen/margin_xs"
-                                android:text="Sat"
+                                android:text="@string/sat"
                                 android:textAppearance="@style/TextAppearance.WellnessTracker.Caption" />
 
                         </LinearLayout>
 
-                        <!-- Sun -->
+                        <!-- Sunday -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:orientation="vertical"
-                            android:gravity="center">
+                            android:gravity="bottom|center_horizontal">
 
                             <FrameLayout
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
+                                android:layout_height="0dp"
+                                android:layout_weight="1">
 
                                 <View
+                                    android:id="@+id/bar_sun"
                                     android:layout_width="20dp"
-                                    android:layout_height="75dp"
-                                    android:layout_gravity="center"
+                                    android:layout_height="4dp"
+                                    android:layout_gravity="bottom|center_horizontal"
                                     android:background="@color/primary_300" />
 
                             </FrameLayout>
 
                             <TextView
+                                android:id="@+id/label_sun"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="@dimen/margin_xs"
-                                android:text="Sun"
+                                android:text="@string/sun"
                                 android:textAppearance="@style/TextAppearance.WellnessTracker.Caption" />
 
                         </LinearLayout>
 
                     </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/weekly_debug"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textAppearance="@style/TextAppearance.WellnessTracker.Caption"
+                        android:textColor="@color/secondary_600"
+                        android:text="" />
 
                 </LinearLayout>
 
@@ -508,6 +468,10 @@
         app:srcCompat="@drawable/ic_add_24"
         app:layout_anchor="@id/scroll"
         app:layout_anchorGravity="bottom|end"
-        android:layout_margin="@dimen/margin_lg" />
+        android:layout_margin="@dimen/margin_lg"
+        android:clickable="true"
+        android:focusable="true"
+        android:translationZ="20dp"
+        android:elevation="20dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
