@@ -119,7 +119,7 @@
                 android:background="@drawable/settings_content_background"
                 android:padding="@dimen/padding_lg"
                 android:elevation="2dp"
-                android:layout_marginBottom="@dimen/margin_xxl"
+                android:layout_marginBottom="@dimen/margin_md"
                 android:orientation="vertical">
 
                 <LinearLayout
@@ -166,6 +166,50 @@
                     android:layout_height="160dp"
                     android:visibility="gone"
                     android:layout_marginTop="@dimen/spacing" />
+
+            </LinearLayout>
+
+            <!-- Weekly Mood Trend Chart (visible) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/settings_content_background"
+                android:padding="@dimen/padding_lg"
+                android:elevation="2dp"
+                android:layout_marginBottom="@dimen/margin_md">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="@dimen/margin_md">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_mood_24"
+                        app:tint="#2C3C48"
+                        android:layout_marginEnd="@dimen/margin_sm" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Mood Trend (7 days)"
+                        android:textSize="@dimen/text_size_title"
+                        android:textStyle="bold"
+                        android:textColor="#2C3E50" />
+
+                </LinearLayout>
+
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/lineChartWeek"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_marginTop="@dimen/margin_sm"
+                    android:padding="@dimen/padding_sm"
+                    tools:visibility="visible" />
 
             </LinearLayout>
 

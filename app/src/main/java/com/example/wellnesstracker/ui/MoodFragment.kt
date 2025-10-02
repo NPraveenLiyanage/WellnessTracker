@@ -440,78 +440,100 @@ class MoodFragment : Fragment() {
     }
 
     private fun setupChart() {
-        binding.lineChart?.apply {
-             description.isEnabled = false
-             setNoDataText(getString(R.string.no_mood_data))
-             axisRight.isEnabled = false
-             axisLeft.apply {
-                 axisMinimum = 0f
-                 axisMaximum = 5.5f
-                 granularity = 1f
-             }
-             xAxis.apply {
-                 position = XAxis.XAxisPosition.BOTTOM
-                 granularity = 1f
-                 setDrawGridLines(false)
-                 valueFormatter = object : ValueFormatter() {
-                     override fun getAxisLabel(value: Float, axis: AxisBase?): String {
-                         val idx = value.toInt()
-                         val dates = last7Days()
-                         return dates.getOrNull(idx)?.toString()?.substring(5) ?: ""
-                     }
-                 }
-             }
-             legend.isEnabled = false
-         }
-     }
+        // Helper to apply shared configuration to a chart
+        fun config(chart: com.github.mikephil.charting.charts.LineChart?) {
+            chart?.apply {
+                description.isEnabled = false
+                setNoDataText(getString(R.string.no_mood_data))
+                axisRight.isEnabled = false
+                axisLeft.apply {
+                    axisMinimum = 0f
+                    axisMaximum = 5.5f
+                    granularity = 1f
+                }
+                xAxis.apply {
+                    position = XAxis.XAxisPosition.BOTTOM
+                    granularity = 1f
+                    setDrawGridLines(false)
+                    valueFormatter = object : ValueFormatter() {
+                        override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+                            val idx = value.toInt()
+                            val dates = last7Days()
+                            return dates.getOrNull(idx)?.toString()?.substring(5) ?: ""
+                        }
+                    }
+                }
+                legend.isEnabled = false
+                // Keep charts simple and non-interactive for this view
+                setTouchEnabled(false)
+                setPinchZoom(false)
+                isDragEnabled = false
+            }
+        }
 
-     private fun updateChart(allMoods: List<Mood>) {
-        binding.lineChart?.let { chart ->
-             val days = last7Days()
+        config(binding.lineChart)
+        config(binding.lineChartWeek)
+    }
 
-             fun score(emoji: String): Int = when (emoji) {
-                 "😊" -> 5
-                 "🙂" -> 4
-                 "😐" -> 3
-                 "😢" -> 2
-                 "😡", "😠" -> 1
-                 "😴" -> 2
-                 "😰" -> 2
-                 else -> 3
-             }
+    private fun updateChart(allMoods: List<Mood>) {
+        // Helper to populate a given chart instance with the same weekly data
+        fun populate(chart: com.github.mikephil.charting.charts.LineChart?) {
+            chart?.let { ch ->
+                val days = last7Days()
 
-             val entries = mutableListOf<Entry>()
-             var anyData = false
-             days.forEachIndexed { index, date ->
-                 val dayMoods = allMoods.filter { it.date == date.toString() }
-                 if (dayMoods.isNotEmpty()) {
-                     anyData = true
-                     val avg = dayMoods.map { score(it.emoji) }.average().toFloat()
-                     entries.add(Entry(index.toFloat(), avg))
-                 } else {
-                     entries.add(Entry(index.toFloat(), Float.NaN))
-                 }
-             }
+                fun score(emoji: String): Int = when (emoji) {
+                    "😊" -> 5
+                    "🙂" -> 4
+                    "😐" -> 3
+                    "😢" -> 2
+                    "😡", "😠" -> 1
+                    "😴" -> 2
+                    "😰" -> 2
+                    else -> 3
+                }
 
-             if (!anyData) {
-                 chart.clear()
-                 chart.invalidate()
-                 return
-             }
+                val entries = mutableListOf<Entry>()
+                var anyData = false
+                days.forEachIndexed { index, date ->
+                    val dayMoods = allMoods.filter { it.date == date.toString() }
+                    if (dayMoods.isNotEmpty()) {
+                        anyData = true
+                        val avg = dayMoods.map { score(it.emoji) }.average().toFloat()
+                        entries.add(Entry(index.toFloat(), avg))
+                    } else {
+                        // MPAndroidChart treats Float.NaN as gaps
+                        entries.add(Entry(index.toFloat(), Float.NaN))
+                    }
+                }
 
-             val dataSet = LineDataSet(entries, "").apply {
-                 mode = LineDataSet.Mode.CUBIC_BEZIER
-                 setDrawCircles(true)
-                 circleRadius = 3f
-                 setDrawValues(false)
-                 color = requireContext().getColor(R.color.primary_500)
-                 setCircleColor(color)
-                 lineWidth = 2f
-             }
-             chart.data = LineData(dataSet)
-             chart.invalidate()
-         }
-     }
+                if (!anyData) {
+                    ch.clear()
+                    ch.invalidate()
+                    return
+                }
+
+                val colorPrimary = requireContext().getColor(R.color.primary_500)
+                val dataSet = LineDataSet(entries, "").apply {
+                    mode = LineDataSet.Mode.CUBIC_BEZIER
+                    setDrawCircles(true)
+                    circleRadius = 4f
+                    setDrawValues(false)
+                    color = colorPrimary
+                    setCircleColor(colorPrimary)
+                    lineWidth = 2f
+                    setDrawFilled(true)
+                    fillColor = colorPrimary
+                    fillAlpha = 40
+                }
+                ch.data = LineData(dataSet)
+                ch.invalidate()
+            }
+        }
+
+        // Populate both the hidden (binding.lineChart) and visible weekly chart
+        populate(binding.lineChart)
+        populate(binding.lineChartWeek)
+    }
 
     /** Returns a list of the last 7 LocalDate values (oldest first, includes today). */
     private fun last7Days(): List<LocalDate> {
